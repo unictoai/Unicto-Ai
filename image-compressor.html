@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Compress and convert images online instantly with Unicto AI. Free, secure, fast image compressor and converter supporting JPG, PNG, WebP." />
+  <meta name="keywords" content="Image Compressor, Image Converter, JPG PNG WebP, Online Image Compression, Unicto AI" />
+  <meta name="author" content="Unicto AI" />
+  <title>Image Compressor & Converter | Unicto AI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      margin: 0;
+      background: #121212;
+      color: #fff;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #00e6e6;
+      font-size: 2rem;
+    }
+    .upload-box {
+      border: 2px dashed #00e6e6;
+      padding: 2rem;
+      margin: 1rem auto;
+      max-width: 600px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .controls {
+      margin: 2rem auto;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .controls label {
+      font-weight: bold;
+    }
+    .image-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .image-wrapper {
+      margin: 1rem;
+      padding: 1rem;
+      background: #1e1e1e;
+      border-radius: 10px;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .btn {
+      background-color: #00e6e6;
+      color: #000;
+      border: none;
+      padding: 1rem 2rem;
+      margin: 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #00cccc;
+    }
+    select, input[type=range] {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: none;
+    }
+    footer {
+      margin-top: 4rem;
+      font-size: 0.85rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>Unicto AI - Image Compressor & Converter</h1>
+
+  <div class="upload-box" onclick="document.getElementById('file-input').click();">
+    <p><i class="fas fa-cloud-upload-alt"></i> Click or Drag & Drop Image</p>
+    <p>Supported: JPG, PNG, WebP | Max: 10MB</p>
+    <input id="file-input" type="file" accept="image/*" hidden onchange="loadImage(event)" />
+  </div>
+
+  <div class="controls">
+    <label for="quality">Compression Quality: <span id="quality-value">80%</span></label>
+    <input type="range" id="quality" min="10" max="100" value="80" onchange="updateQuality()" />
+
+    <label for="format">Convert Format:</label>
+    <select id="format">
+      <option value="image/jpeg">JPG</option>
+      <option value="image/png">PNG</option>
+      <option value="image/webp">WebP</option>
+    </select>
+  </div>
+
+  <div class="image-section">
+    <div class="image-wrapper" id="original-wrapper" style="display:none">
+      <h3>Original (<span id="original-size"></span>)</h3>
+      <img id="original-image" />
+    </div>
+
+    <div class="image-wrapper" id="compressed-wrapper" style="display:none">
+      <h3>Compressed (<span id="compressed-size"></span>)</h3>
+      <img id="compressed-image" />
+      <button class="btn" onclick="downloadImage()">Download</button>
+    </div>
+  </div>
+
+  <div>
+    <button class="btn" onclick="compressImage()">Compress</button>
+    <button class="btn" onclick="resetTool()">Reset</button>
+  </div>
+
+  <footer>
+    &copy; 2025 Unicto AI. Smart Tools for Smart Creators.
+  </footer>
+
+  <script>
+    let originalDataURL = "";
+    let compressedBlob;
+
+    function loadImage(event) {
+      const file = event.target.files[0];
+      if (!file || file.size > 10 * 1024 * 1024) {
+        alert("Please select a valid image file under 10MB.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        originalDataURL = e.target.result;
+        const img = document.getElementById('original-image');
+        img.src = originalDataURL;
+        img.onload = () => {
+          document.getElementById('original-wrapper').style.display = 'block';
+          document.getElementById('original-size').innerText = formatBytes(file.size);
+          document.getElementById('compressed-wrapper').style.display = 'none';
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function compressImage() {
+      if (!originalDataURL) {
+        alert("Please upload an image first.");
+        return;
+      }
+
+      const quality = document.getElementById('quality').value / 100;
+      const format = document.getElementById('format').value;
+
+      const img = new Image();
+      img.src = originalDataURL;
+
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob(function (blob) {
+          if (!blob) {
+            alert("Failed to compress image.");
+            return;
+          }
+
+          compressedBlob = blob;
+          const url = URL.createObjectURL(blob);
+
+          const compImg = document.getElementById('compressed-image');
+          compImg.src = url;
+          compImg.onload = () => URL.revokeObjectURL(url);
+
+          document.getElementById('compressed-wrapper').style.display = 'block';
+          document.getElementById('compressed-size').innerText = formatBytes(blob.size);
+        }, format, quality);
+      };
+    }
+
+    function downloadImage() {
+      if (!compressedBlob) {
+        alert("Please compress an image first.");
+        return;
+      }
+
+      const format = document.getElementById('format').value;
+      const extension = format.split("/")[1];
+
+      const downloadLink = document.createElement('a');
+      const url = URL.createObjectURL(compressedBlob);
+      downloadLink.href = url;
+      downloadLink.download = `compressed-image.${extension}`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(url);
+    }
+
+    function updateQuality() {
+      const quality = document.getElementById('quality').value;
+      document.getElementById('quality-value').textContent = quality + '%';
+    }
+
+    function resetTool() {
+      document.getElementById('file-input').value = '';
+      originalDataURL = '';
+      compressedBlob = null;
+      document.getElementById('original-wrapper').style.display = 'none';
+      document.getElementById('compressed-wrapper').style.display = 'none';
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+  </script>
+</body>
+</html>
