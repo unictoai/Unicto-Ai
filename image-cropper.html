@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Unicto AI - Image Crop Tool</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet" />
   <style>
@@ -114,6 +114,11 @@
       padding: 1rem;
     }
 
+    label, input[type=range] {
+      display: block;
+      margin-top: 0.5rem;
+    }
+
     @media (max-width: 768px) {
       .controls {
         flex-direction: column;
@@ -151,6 +156,10 @@
         </select>
       </div>
       <div class="control-group">
+        <label for="quality">Quality: <span id="quality-value">100</span>%</label>
+        <input type="range" min="10" max="100" value="100" id="quality" />
+      </div>
+      <div class="control-group">
         <button id="crop-btn" onclick="cropImage()" disabled>Crop Image</button>
       </div>
     </div>
@@ -168,7 +177,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
   <script>
     let cropper = null;
-    let currentImage = null;
+    let currentImageBlob = null;
 
     const uploadSection = document.getElementById('upload-section');
     const fileInput = document.getElementById('file-input');
@@ -176,31 +185,35 @@
     const previewImage = document.getElementById('preview-image');
     const cropBtn = document.getElementById('crop-btn');
     const aspectRatioSelect = document.getElementById('aspect-ratio');
+    const qualitySlider = document.getElementById('quality');
+    const qualityValue = document.getElementById('quality-value');
 
     uploadSection.addEventListener('click', () => fileInput.click());
-    uploadSection.addEventListener('dragover', e => e.preventDefault());
-    uploadSection.addEventListener('drop', e => {
+
+    uploadSection.addEventListener('dragover', (e) => e.preventDefault());
+    uploadSection.addEventListener('drop', (e) => {
       e.preventDefault();
       handleFile(e.dataTransfer.files[0]);
     });
 
-    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => e.preventDefault());
+
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 
     function handleFile(file) {
       if (!file || !file.type.startsWith('image/')) {
         alert('Please upload a valid image file');
         return;
       }
-
       if (file.size > 10 * 1024 * 1024) {
         alert('File size exceeds 10MB limit');
         return;
       }
-
       if (cropper) cropper.destroy();
 
       const reader = new FileReader();
-      reader.onload = e => {
+      reader.onload = (e) => {
         previewImage.src = e.target.result;
         imageContainer.style.display = 'block';
         cropBtn.disabled = false;
@@ -215,7 +228,6 @@
         viewMode: 1,
         autoCropArea: 1,
         responsive: true,
-        guides: true,
         background: false,
         ready() {
           updateAspectRatio();
@@ -224,6 +236,7 @@
     }
 
     function updateAspectRatio() {
+      if (!cropper) return;
       const ratio = aspectRatioSelect.value;
       if (ratio === 'free') {
         cropper.setAspectRatio(NaN);
@@ -234,29 +247,37 @@
     }
 
     aspectRatioSelect.addEventListener('change', updateAspectRatio);
+    qualitySlider.addEventListener('input', () => {
+      qualityValue.textContent = qualitySlider.value;
+    });
 
     function cropImage() {
       showProcessing(true);
-      setTimeout(() => {
-        const canvas = cropper.getCroppedCanvas({ imageSmoothingQuality: 'high' });
-        if (canvas) {
-          currentImage = canvas.toDataURL('image/png');
+      requestAnimationFrame(() => {
+        cropper.getCroppedCanvas({
+          imageSmoothingQuality: 'high'
+        }).toBlob(blob => {
+          currentImageBlob = blob;
+          const previewUrl = URL.createObjectURL(blob);
           document.getElementById('preview-section').style.display = 'block';
           document.getElementById('preview-container').innerHTML =
-            `<img src="${currentImage}" style="max-width: 100%; border-radius: 6px;">`;
-        } else {
-          alert('Cropping failed. Try again.');
-        }
-        showProcessing(false);
-      }, 300);
+            `<img src="${previewUrl}" style="max-width: 100%; border-radius: 6px;">`;
+          showProcessing(false);
+        }, 'image/jpeg', qualitySlider.value / 100);
+      });
     }
 
     function downloadCroppedImage() {
-      if (!currentImage) return;
+      if (!currentImageBlob) return;
+
       const link = document.createElement('a');
-      link.download = `unicto-cropped-${Date.now()}.png`;
-      link.href = currentImage;
+      const url = URL.createObjectURL(currentImageBlob);
+      link.href = url;
+      link.download = `unicto-cropped-${Date.now()}.jpg`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
 
     function showProcessing(show) {
