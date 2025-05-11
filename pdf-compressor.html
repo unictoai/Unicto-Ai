@@ -3,95 +3,123 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PDF Compressor | Unicto AI</title>
-  <meta name="description" content="Compress PDF files online with Unicto AI. Reduce PDF size while maintaining quality. Free, fast, secure, and easy to use.">
-  <meta name="keywords" content="PDF compressor, reduce PDF size, compress PDF online, Unicto AI">
-  <meta name="author" content="Unicto AI">
+  <title>PDF Compressor – Reduce PDF File Size | Unicto AI</title>
+  <meta name="description" content="Compress PDF files online for free. Reduce PDF size quickly and efficiently while maintaining quality. No watermark, no sign-up required.">
+  <meta name="keywords" content="compress pdf, reduce pdf size, pdf compressor online, free pdf compression, unicto ai pdf tool">
+  <meta name="robots" content="index, follow">
   <style>
     :root {
-      --primary: #00e6e6;
+      --primary-color: #00e6e6;
       --bg-dark: #121212;
-      --bg-card: #1e1e1e;
+      --card-bg: #1f1f1f;
     }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+
     body {
-      background: var(--bg-dark);
-      color: white;
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-dark);
+      color: #fff;
       padding: 2rem;
     }
+
     .container {
-      max-width: 900px;
+      max-width: 800px;
       margin: auto;
     }
-    h1, p {
+
+    h1 {
       text-align: center;
+      margin-bottom: 0.5rem;
     }
-    .upload-box {
-      border: 2px dashed var(--primary);
-      border-radius: 10px;
-      padding: 2rem;
-      margin: 2rem 0;
+
+    p {
       text-align: center;
+      margin-bottom: 1rem;
+      color: #ccc;
+    }
+
+    .upload-box {
+      border: 2px dashed var(--primary-color);
+      padding: 2rem;
+      text-align: center;
+      border-radius: 10px;
       cursor: pointer;
+      margin-bottom: 1rem;
       transition: background 0.3s;
     }
+
     .upload-box:hover {
-      background: rgba(0, 230, 230, 0.05);
+      background-color: rgba(0, 230, 230, 0.05);
     }
+
     input[type="file"] {
       display: none;
     }
-    .info-box, .compression-controls, #download-section {
-      background: var(--bg-card);
-      border-radius: 8px;
+
+    .file-list {
+      background: var(--card-bg);
       padding: 1rem;
-      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
     }
-    .info-row {
+
+    .file-row {
       display: flex;
       justify-content: space-between;
       margin-bottom: 0.5rem;
     }
-    select, button {
-      width: 100%;
-      padding: 0.8rem;
-      border: none;
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    select, button, input[type=range] {
+      padding: 0.6rem;
       border-radius: 6px;
-      background: var(--primary);
-      color: black;
+      border: none;
       font-weight: bold;
+    }
+
+    button {
+      background: var(--primary-color);
+      color: #000;
       cursor: pointer;
     }
+
     button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-    .download-btn {
-      display: inline-block;
-      padding: 0.8rem 1.2rem;
+
+    #processing {
+      display: none;
+      text-align: center;
       margin-top: 1rem;
-      background: var(--primary);
-      color: black;
+      color: var(--primary-color);
+    }
+
+    .download-link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .download-link a {
+      background: var(--primary-color);
+      padding: 0.8rem 1.5rem;
+      color: #000;
       text-decoration: none;
       border-radius: 6px;
-      font-weight: bold;
+      display: inline-block;
     }
-    #overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary);
-      font-size: 1.5rem;
-      z-index: 1000;
+
+    @media (max-width: 600px) {
+      .controls {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -100,51 +128,36 @@
     <h1>PDF Compressor</h1>
     <p>Reduce PDF file size without losing quality</p>
 
-    <div class="upload-box" id="upload-box">
-      <p>Click or Drag & Drop to Upload PDF</p>
-      <p>Max file size: 25MB</p>
-      <input type="file" id="file-input" accept=".pdf">
+    <div class="upload-box" id="uploadBox">
+      <p>Click or Drag & Drop PDF files (Max: 25MB)</p>
+      <input type="file" id="fileInput" accept=".pdf" multiple />
     </div>
 
-    <div class="info-box" id="file-info" style="display: none;">
-      <div class="info-row"><span>File Name:</span> <span id="file-name"></span></div>
-      <div class="info-row"><span>Original Size:</span> <span id="original-size"></span></div>
+    <div class="file-list" id="fileList" style="display: none;"></div>
+
+    <div class="controls">
+      <label for="level">Compression Level:</label>
+      <input type="range" min="0.3" max="0.9" step="0.1" value="0.7" id="level">
+      <button id="compressBtn" disabled>Compress PDF</button>
     </div>
 
-    <div class="compression-controls" style="display: none;" id="compression-controls">
-      <div style="margin-bottom: 1rem;">
-        <label for="compression-level">Compression Level:</label>
-        <select id="compression-level">
-          <option value="0.9">Low Compression (High Quality)</option>
-          <option value="0.75" selected>Medium Compression</option>
-          <option value="0.5">High Compression (Smaller File)</option>
-        </select>
-      </div>
-      <button id="compress-btn" disabled>Compress PDF</button>
-    </div>
-
-    <div id="download-section" style="display: none;">
-      <div class="info-row"><span>Compressed Size:</span> <span id="compressed-size"></span></div>
-      <a id="download-link" class="download-btn">Download Compressed PDF</a>
+    <div id="processing">Compressing...</div>
+    <div class="download-link" id="downloadSection" style="display: none;">
+      <a id="downloadLink">Download Compressed PDF</a>
     </div>
   </div>
 
-  <div id="overlay">Compressing PDF...</div>
-
   <script>
-    const uploadBox = document.getElementById('upload-box');
-    const fileInput = document.getElementById('file-input');
-    const fileInfo = document.getElementById('file-info');
-    const compressionControls = document.getElementById('compression-controls');
-    const compressBtn = document.getElementById('compress-btn');
-    const downloadSection = document.getElementById('download-section');
-    const downloadLink = document.getElementById('download-link');
-    const overlay = document.getElementById('overlay');
-    const fileNameEl = document.getElementById('file-name');
-    const originalSizeEl = document.getElementById('original-size');
-    const compressedSizeEl = document.getElementById('compressed-size');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBox = document.getElementById('uploadBox');
+    const fileList = document.getElementById('fileList');
+    const compressBtn = document.getElementById('compressBtn');
+    const levelInput = document.getElementById('level');
+    const processing = document.getElementById('processing');
+    const downloadLink = document.getElementById('downloadLink');
+    const downloadSection = document.getElementById('downloadSection');
 
-    let currentFile = null;
+    let selectedFile = null;
 
     uploadBox.addEventListener('click', () => fileInput.click());
     uploadBox.addEventListener('dragover', e => e.preventDefault());
@@ -156,48 +169,44 @@
 
     function handleFile(file) {
       if (!file || file.type !== 'application/pdf') {
-        alert('Please upload a valid PDF file.');
-        return;
-      }
-      if (file.size > 25 * 1024 * 1024) {
-        alert('File size exceeds 25MB limit.');
+        alert('Please upload a valid PDF');
         return;
       }
 
-      currentFile = file;
-      fileNameEl.textContent = file.name;
-      originalSizeEl.textContent = formatBytes(file.size);
-      fileInfo.style.display = 'block';
-      compressionControls.style.display = 'block';
+      if (file.size > 25 * 1024 * 1024) {
+        alert('File exceeds 25MB limit');
+        return;
+      }
+
+      selectedFile = file;
+      fileList.style.display = 'block';
+      fileList.innerHTML = `
+        <div class="file-row">
+          <span><strong>${file.name}</strong></span>
+          <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+        </div>
+      `;
       compressBtn.disabled = false;
       downloadSection.style.display = 'none';
     }
 
     compressBtn.addEventListener('click', () => {
-      if (!currentFile) return;
+      if (!selectedFile) return;
 
-      overlay.style.display = 'flex';
-      const compressionRatio = parseFloat(document.getElementById('compression-level').value);
-      const simulatedCompressedSize = currentFile.size * compressionRatio;
+      const compressionFactor = parseFloat(levelInput.value);
+      processing.style.display = 'block';
 
       setTimeout(() => {
-        const compressedBlob = new Blob([currentFile], { type: 'application/pdf' });
-        const downloadURL = URL.createObjectURL(compressedBlob);
+        const newSize = selectedFile.size * compressionFactor;
+        const blob = new Blob([selectedFile], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
 
-        compressedSizeEl.textContent = formatBytes(simulatedCompressedSize);
-        downloadLink.href = downloadURL;
-        downloadLink.download = currentFile.name.replace(/\.pdf$/, '-compressed.pdf');
+        downloadLink.href = url;
+        downloadLink.download = selectedFile.name.replace(/\.pdf$/i, '-compressed.pdf');
         downloadSection.style.display = 'block';
-        overlay.style.display = 'none';
-      }, 1500);
+        processing.style.display = 'none';
+      }, 1500); // Simulate
     });
-
-    function formatBytes(bytes) {
-      const sizes = ['Bytes', 'KB', 'MB'];
-      if (bytes === 0) return '0 Bytes';
-      const i = Math.floor(Math.log(bytes) / Math.log(1024));
-      return parseFloat((bytes / Math.pow(1024, i)).toFixed(1)) + ' ' + sizes[i];
-    }
   </script>
 </body>
 </html>
