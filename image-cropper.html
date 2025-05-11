@@ -147,6 +147,7 @@
           <option value="16:10">16:10</option>
           <option value="3:2">3:2</option>
           <option value="1:1">1:1 (Square)</option>
+          <option value="9:16">9:16 (Portrait)</option>
         </select>
       </div>
       <div class="control-group">
@@ -177,17 +178,13 @@
     const aspectRatioSelect = document.getElementById('aspect-ratio');
 
     uploadSection.addEventListener('click', () => fileInput.click());
-
-    uploadSection.addEventListener('dragover', (e) => e.preventDefault());
-    uploadSection.addEventListener('drop', (e) => {
+    uploadSection.addEventListener('dragover', e => e.preventDefault());
+    uploadSection.addEventListener('drop', e => {
       e.preventDefault();
       handleFile(e.dataTransfer.files[0]);
     });
 
-    window.addEventListener('dragover', (e) => e.preventDefault());
-    window.addEventListener('drop', (e) => e.preventDefault());
-
-    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
     function handleFile(file) {
       if (!file || !file.type.startsWith('image/')) {
@@ -203,7 +200,7 @@
       if (cropper) cropper.destroy();
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         previewImage.src = e.target.result;
         imageContainer.style.display = 'block';
         cropBtn.disabled = false;
@@ -228,21 +225,30 @@
 
     function updateAspectRatio() {
       const ratio = aspectRatioSelect.value;
-      cropper.setAspectRatio(ratio === 'free' ? NaN : eval(ratio));
+      if (ratio === 'free') {
+        cropper.setAspectRatio(NaN);
+      } else {
+        const [w, h] = ratio.split(':').map(Number);
+        cropper.setAspectRatio(w / h);
+      }
     }
 
     aspectRatioSelect.addEventListener('change', updateAspectRatio);
 
     function cropImage() {
       showProcessing(true);
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         const canvas = cropper.getCroppedCanvas({ imageSmoothingQuality: 'high' });
-        currentImage = canvas.toDataURL('image/png');
-        document.getElementById('preview-section').style.display = 'block';
-        document.getElementById('preview-container').innerHTML =
-          `<img src="${currentImage}" style="max-width: 100%; border-radius: 6px;">`;
+        if (canvas) {
+          currentImage = canvas.toDataURL('image/png');
+          document.getElementById('preview-section').style.display = 'block';
+          document.getElementById('preview-container').innerHTML =
+            `<img src="${currentImage}" style="max-width: 100%; border-radius: 6px;">`;
+        } else {
+          alert('Cropping failed. Try again.');
+        }
         showProcessing(false);
-      });
+      }, 300);
     }
 
     function downloadCroppedImage() {
@@ -258,4 +264,4 @@
     }
   </script>
 </body>
-            </html>
+</html>
