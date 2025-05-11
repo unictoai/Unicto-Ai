@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word to PDF Converter | Unicto AI</title>
+  <meta name="description" content="Convert Word documents (DOC, DOCX) to PDF instantly with Unicto AI's free online tool. Secure, fast, and easy to use. No installation needed." />
+  <meta name="keywords" content="Word to PDF, DOC to PDF, DOCX to PDF, Convert Word to PDF, Online Word Converter, Unicto AI" />
+  <meta name="author" content="Unicto AI" />
+  <link rel="canonical" href="https://unicto.com/word-to-pdf-converter" />
+  <style>
+    :root {
+      --primary-color: #00e6e6;
+      --background-dark: #121212;
+      --card-background: #1e1e1e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--background-dark);
+      color: #fff;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .upload-section {
+      border: 2px dashed var(--primary-color);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .upload-section:hover {
+      background: rgba(0, 230, 230, 0.05);
+    }
+
+    #file-info {
+      background: var(--card-background);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    button {
+      background: var(--primary-color);
+      color: #000;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.3s;
+      margin: 1rem 0;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #download-section {
+      display: none;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .download-btn {
+      background: var(--primary-color);
+      color: #000;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    #processing-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      z-index: 9999;
+    }
+
+    .file-details {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tool-header">
+      <h1>Word to PDF Converter</h1>
+      <p>Convert DOC/DOCX documents to PDF format</p>
+    </div>
+
+    <div
+      class="upload-section"
+      id="upload-section"
+      tabindex="0"
+      role="button"
+      aria-label="Click or drag and drop to upload a Word document"
+    >
+      <p>Drag & Drop or Click to Upload Word Document</p>
+      <p>Supports: .doc, .docx | Max file size: 25MB</p>
+      <input type="file" id="file-input" accept=".doc,.docx" hidden />
+    </div>
+
+    <div id="file-info">
+      <div class="file-details">
+        <span>File Name:</span>
+        <span id="file-name"></span>
+      </div>
+      <div class="file-details">
+        <span>File Size:</span>
+        <span id="file-size"></span>
+      </div>
+    </div>
+
+    <div style="text-align: center;">
+      <button id="convert-btn" disabled>Convert to PDF</button>
+    </div>
+
+    <div id="download-section">
+      <h3>Your PDF is ready!</h3>
+      <a id="download-link" class="download-btn">Download PDF</a>
+    </div>
+
+    <div id="processing-overlay">Processing...</div>
+  </div>
+
+  <script>
+    const uploadSection = document.getElementById('upload-section');
+    const fileInput = document.getElementById('file-input');
+    const convertBtn = document.getElementById('convert-btn');
+    const downloadSection = document.getElementById('download-section');
+    const fileNameSpan = document.getElementById('file-name');
+    const fileSizeSpan = document.getElementById('file-size');
+    const fileInfo = document.getElementById('file-info');
+    const downloadLink = document.getElementById('download-link');
+
+    let currentFile = null;
+
+    uploadSection.addEventListener('click', () => fileInput.click());
+    uploadSection.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') fileInput.click();
+    });
+
+    uploadSection.addEventListener('dragover', (e) => e.preventDefault());
+    uploadSection.addEventListener('drop', (e) => {
+      e.preventDefault();
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+    function handleFile(file) {
+      if (!file || !file.name.match(/\.(doc|docx)$/i)) {
+        alert('Please upload a valid Word document');
+        return;
+      }
+
+      if (file.size > 25 * 1024 * 1024) {
+        alert('File size exceeds 25MB limit');
+        return;
+      }
+
+      currentFile = file;
+      fileInfo.style.display = 'block';
+      fileNameSpan.textContent = file.name;
+      fileSizeSpan.textContent = formatBytes(file.size);
+      convertBtn.disabled = false;
+      downloadSection.style.display = 'none';
+    }
+
+    convertBtn.addEventListener('click', async () => {
+      if (!currentFile) return;
+
+      showProcessing(true);
+
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate delay
+
+      // Simulated download blob (real backend would return a link)
+      const pdfContent = new Blob(["%PDF-1.4\n%Simulated PDF file"], { type: 'application/pdf' });
+      const pdfURL = URL.createObjectURL(pdfContent);
+
+      downloadLink.href = pdfURL;
+      downloadLink.download = currentFile.name.replace(/\.(docx?|)$/i, '.pdf');
+      downloadSection.style.display = 'block';
+
+      showProcessing(false);
+    });
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function showProcessing(show) {
+      const overlay = document.getElementById('processing-overlay');
+      overlay.style.display = show ? 'flex' : 'none';
+    }
+  </script>
+</body>
+        </html>
