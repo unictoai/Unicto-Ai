@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF to Word Converter Online | Free & Fast | Unicto AI</title>
+  <meta name="description" content="Easily convert PDF files to editable Word documents (.docx) online with Unicto AI. Free, fast & secure PDF to Word converter with no watermark." />
+  <meta name="keywords" content="PDF to Word, PDF converter, Word converter, Unicto AI, Free PDF tools" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Unicto AI" />
+  <meta property="og:title" content="PDF to Word Converter - Free & Fast | Unicto AI" />
+  <meta property="og:description" content="Convert PDF files to Word documents online for free using Unicto AI’s fast, secure and simple tool." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.unicto.com/pdf-to-word-converter" />
+  <meta property="og:image" content="https://www.unicto.com/assets/pdf-to-word-thumbnail.png" />
+
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-x..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root {
+      --primary-color: #00e6e6;
+      --background-dark: #111;
+      --card-background: #1c1c1c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--background-dark);
+      color: white;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+
+    p.description {
+      text-align: center;
+      color: #ccc;
+      margin-bottom: 2rem;
+    }
+
+    .upload-box {
+      border: 2px dashed var(--primary-color);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .upload-box:hover {
+      background: rgba(0, 230, 230, 0.1);
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .file-details {
+      display: none;
+      background: var(--card-background);
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .file-details span {
+      display: block;
+      margin: 0.3rem 0;
+    }
+
+    button {
+      display: block;
+      margin: 2rem auto 0;
+      background: var(--primary-color);
+      color: #000;
+      border: none;
+      padding: 0.8rem 1.6rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .progress-bar {
+      height: 5px;
+      background: var(--primary-color);
+      width: 0%;
+      transition: width 0.5s;
+    }
+
+    .download-area {
+      display: none;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .download-btn {
+      background: var(--primary-color);
+      color: #000;
+      text-decoration: none;
+      padding: 0.8rem 1.6rem;
+      border-radius: 6px;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PDF to Word Converter</h1>
+    <p class="description">Convert your PDF files into editable Word documents for free.</p>
+
+    <div class="upload-box" id="upload-box">
+      <i class="fas fa-file-upload fa-2x"></i>
+      <p>Click or Drag & Drop PDF here</p>
+      <input type="file" id="file-input" accept=".pdf" />
+    </div>
+
+    <div class="file-details" id="file-details">
+      <span><strong>Name:</strong> <span id="file-name"></span></span>
+      <span><strong>Size:</strong> <span id="file-size"></span></span>
+    </div>
+
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <button id="convert-btn" disabled>Convert to Word</button>
+
+    <div class="download-area" id="download-area">
+      <h3>Conversion Successful!</h3>
+      <a href="#" class="download-btn" id="download-link" download="converted.docx">Download Word File</a>
+    </div>
+
+    <footer>
+      &copy; 2025 Unicto AI. All rights reserved.
+    </footer>
+  </div>
+
+  <script>
+    const uploadBox = document.getElementById('upload-box');
+    const fileInput = document.getElementById('file-input');
+    const fileDetails = document.getElementById('file-details');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const convertBtn = document.getElementById('convert-btn');
+    const downloadArea = document.getElementById('download-area');
+    const downloadLink = document.getElementById('download-link');
+    const progressBar = document.getElementById('progress-bar');
+
+    uploadBox.addEventListener('click', () => fileInput.click());
+    uploadBox.addEventListener('dragover', e => {
+      e.preventDefault();
+      uploadBox.style.background = "rgba(0, 230, 230, 0.2)";
+    });
+    uploadBox.addEventListener('dragleave', () => {
+      uploadBox.style.background = "transparent";
+    });
+    uploadBox.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadBox.style.background = "transparent";
+      const file = e.dataTransfer.files[0];
+      handleFile(file);
+    });
+
+    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+    function handleFile(file) {
+      if (!file || file.type !== 'application/pdf') {
+        alert("Only PDF files are allowed.");
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        alert("File exceeds 25MB limit.");
+        return;
+      }
+
+      fileDetails.style.display = 'block';
+      fileName.textContent = file.name;
+      fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
+      convertBtn.disabled = false;
+    }
+
+    convertBtn.addEventListener('click', async () => {
+      progressBar.style.width = '0%';
+      convertBtn.disabled = true;
+      progressBar.style.width = '30%';
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      progressBar.style.width = '60%';
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      progressBar.style.width = '100%';
+
+      // Simulate backend conversion URL
+      downloadLink.href = "#"; // Replace with actual blob URL or API response
+      downloadArea.style.display = 'block';
+    });
+  </script>
+</body>
+</html>
