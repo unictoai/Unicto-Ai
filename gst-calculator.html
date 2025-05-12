@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GST Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      color: #333;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #ffffff;
+    }
+    .calculator {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .dark-mode .calculator {
+      background: #1e1e1e;
+    }
+    .input-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .result, .history {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #e9ecef;
+      border-radius: 4px;
+    }
+    .dark-mode .result, .dark-mode .history {
+      background: #2e2e2e;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .pdf-btn {
+      background-color: #007bff;
+      color: white;
+    }
+    .toggle-btn {
+      background-color: #6c757d;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h2>GST Calculator</h2>
+
+    <div class="input-group">
+      <label for="currency">Currency</label>
+      <select id="currency">
+        <option value="INR">INR (₹)</option>
+        <option value="USD">USD ($)</option>
+        <option value="EUR">EUR (€)</option>
+        <option value="PKR">PKR (₨)</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label for="gstRate">GST Rate (%)</label>
+      <input type="number" id="gstRate" placeholder="Enter GST %">
+    </div>
+
+    <div class="input-group">
+      <label for="netPrice">Net Price (<span class="symbol">₹</span>)</label>
+      <input type="number" id="netPrice" placeholder="Amount before GST">
+    </div>
+
+    <div class="input-group">
+      <label for="grossPrice">Gross Price (<span class="symbol">₹</span>)</label>
+      <input type="number" id="grossPrice" placeholder="Amount including GST">
+    </div>
+
+    <div class="result">
+      GST Amount: <span class="symbol">₹</span><span id="gstAmount">0.00</span><br>
+      CGST: <span class="symbol">₹</span><span id="cgst">0.00</span>, SGST: <span class="symbol">₹</span><span id="sgst">0.00</span><br>
+      Converted Net: <span id="convertedNet"></span>, Gross: <span id="convertedGross"></span>, GST: <span id="convertedGst"></span>
+    </div>
+
+    <div class="history">
+      <h4>Conversion History:</h4>
+      <ul id="historyList"></ul>
+    </div>
+
+    <button class="pdf-btn" onclick="exportToPDF()">Export to PDF</button>
+    <button class="toggle-btn" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const gstRate = document.getElementById('gstRate');
+    const netPrice = document.getElementById('netPrice');
+    const grossPrice = document.getElementById('grossPrice');
+    const gstAmount = document.getElementById('gstAmount');
+    const cgst = document.getElementById('cgst');
+    const sgst = document.getElementById('sgst');
+    const currency = document.getElementById('currency');
+    const convertedNet = document.getElementById('convertedNet');
+    const convertedGross = document.getElementById('convertedGross');
+    const convertedGst = document.getElementById('convertedGst');
+    const historyList = document.getElementById('historyList');
+    const symbols = {
+      INR: '₹', USD: '$', EUR: '€', PKR: '₨'
+    };
+
+    let history = [];
+    let lastEdited = null;
+
+    [gstRate, netPrice, grossPrice].forEach(input => {
+      input.addEventListener('input', e => {
+        lastEdited = e.target.id;
+        calculateGST();
+      });
+    });
+
+    currency.addEventListener('change', () => {
+      updateSymbols();
+      fetchConversion();
+    });
+
+    function updateSymbols() {
+      const sym = symbols[currency.value];
+      document.querySelectorAll('.symbol').forEach(el => el.textContent = sym);
+    }
+
+    async function fetchConversion() {
+      const base = 'INR';
+      const target = currency.value;
+      const rate = await getExchangeRate(base, target);
+      const net = parseFloat(netPrice.value) || 0;
+      const gross = parseFloat(grossPrice.value) || 0;
+      const gst = gross - net;
+      const sym = symbols[target];
+      convertedNet.textContent = sym + (net * rate).toFixed(2);
+      convertedGross.textContent = sym + (gross * rate).toFixed(2);
+      convertedGst.textContent = sym + (gst * rate).toFixed(2);
+    }
+
+    async function getExchangeRate(base, target) {
+      try {
+        const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${base}`);
+        const data = await res.json();
+        return data.rates[target] || 1;
+      } catch (e) {
+        console.error('Conversion failed:', e);
+        return 1;
+      }
+    }
+
+    function calculateGST() {
+      const rate = parseFloat(gstRate.value) || 0;
+      let net = parseFloat(netPrice.value) || 0;
+      let gross = parseFloat(grossPrice.value) || 0;
+
+      if (lastEdited === 'netPrice') {
+        gross = net * (1 + rate/100);
+        grossPrice.value = gross.toFixed(2);
+      } else if (lastEdited === 'grossPrice') {
+        net = gross / (1 + rate/100);
+        netPrice.value = net.toFixed(2);
+      }
+
+      const gst = gross - net;
+      gstAmount.textContent = gst.toFixed(2);
+      cgst.textContent = (gst/2).toFixed(2);
+      sgst.textContent = (gst/2).toFixed(2);
+
+      fetchConversion();
+      addToHistory(net, gross, gst);
+    }
+
+    function addToHistory(net, gross, gst) {
+      const entry = `Net: ${net.toFixed(2)}, Gross: ${gross.toFixed(2)}, GST: ${gst.toFixed(2)}`;
+      history.unshift(entry);
+      if (history.length > 5) history.pop();
+      historyList.innerHTML = history.map(h => `<li>${h}</li>`).join('');
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("GST Calculator Report", 10, 10);
+      doc.text(`Net Price: ${netPrice.value}`, 10, 20);
+      doc.text(`Gross Price: ${grossPrice.value}`, 10, 30);
+      doc.text(`GST Amount: ${gstAmount.textContent}`, 10, 40);
+      doc.text(`CGST: ${cgst.textContent}, SGST: ${sgst.textContent}`, 10, 50);
+      doc.save("gst-report.pdf");
+    }
+
+    updateSymbols();
+  </script>
+</body>
+</html>
