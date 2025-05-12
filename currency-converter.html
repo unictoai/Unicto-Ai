@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Currency Converter</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f2f5;
+    }
+
+    .converter-container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a73e8;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 0.7rem;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background-color: #1557b0;
+    }
+
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .swap-button {
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .custom-rates {
+      margin-top: 20px;
+    }
+
+    .rate-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 5px;
+    }
+
+    .custom-rate-list {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .custom-rate-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <div class="converter-container">
+    <h1>Advanced Currency Converter</h1>
+    
+    <div class="input-group">
+      <label>Amount:</label>
+      <input type="number" id="amount" placeholder="Enter amount" step="0.01">
+    </div>
+    
+    <div class="input-group">
+      <label>From:</label>
+      <select id="fromCurrency"></select>
+    </div>
+
+    <div class="swap-button">
+      <button onclick="swapCurrencies()">⇅ Swap Currencies</button>
+    </div>
+
+    <div class="input-group">
+      <label>To:</label>
+      <select id="toCurrency"></select>
+    </div>
+
+    <div class="rate-controls">
+      <button onclick="convertCurrency()">Convert</button>
+      <button onclick="showCustomRateModal()">Set Custom Rate</button>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <div class="custom-rates">
+      <h3>Custom Exchange Rates</h3>
+      <div class="custom-rate-list" id="customRateList"></div>
+    </div>
+  </div>
+
+  <div id="customRateModal" class="modal">
+    <div class="modal-content">
+      <h3>Set Custom Exchange Rate</h3>
+      <div class="input-group">
+        <label>From Currency:</label>
+        <select id="customFromCurrency"></select>
+      </div>
+      <div class="input-group">
+        <label>To Currency:</label>
+        <select id="customToCurrency"></select>
+      </div>
+      <div class="input-group">
+        <label>Rate:</label>
+        <input type="number" id="customRate" step="0.0001">
+      </div>
+      <button onclick="saveCustomRate()">Save Rate</button>
+      <button onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://api.exchangerate.host';
+    let currencies = [];
+    let customRates = JSON.parse(localStorage.getItem('customRates')) || {};
+
+    async function initialize() {
+      await loadCurrencies();
+      populateCurrencySelects();
+      populateCustomRateList();
+    }
+
+    async function loadCurrencies() {
+      try {
+        const response = await fetch(`${API_URL}/symbols`);
+        const data = await response.json();
+        currencies = Object.values(data.symbols);
+      } catch (error) {
+        console.error('Error loading currencies:', error);
+        currencies = [
+          { code: 'USD', description: 'US Dollar' },
+          { code: 'EUR', description: 'Euro' },
+          { code: 'INR', description: 'Indian Rupee' }
+        ];
+      }
+    }
+
+    function populateCurrencySelects() {
+      const populateSelect = (id) => {
+        const select = document.getElementById(id);
+        select.innerHTML = currencies.map(currency => 
+          `<option value="${currency.code}">${currency.code} - ${currency.description}</option>`
+        ).join('');
+      };
+      populateSelect('fromCurrency');
+      populateSelect('toCurrency');
+      populateSelect('customFromCurrency');
+      populateSelect('customToCurrency');
+    }
+
+    async function convertCurrency() {
+      const amount = parseFloat(document.getElementById('amount').value);
+      const from = document.getElementById('fromCurrency').value;
+      const to = document.getElementById('toCurrency').value;
+
+      if (isNaN(amount)) {
+        showResult('Please enter a valid amount');
+        return;
+      }
+
+      const customKey = `${from}_${to}`;
+      if (customRates[customKey]) {
+        const converted = (amount * customRates[customKey]).toFixed(4);
+        showResult(`${amount} ${from} = ${converted} ${to} (Custom Rate)`);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/convert?from=${from}&to=${to}&amount=${amount}`);
+        const data = await res.json();
+        if (data.result) {
+          showResult(`${amount} ${from} = ${data.result.toFixed(4)} ${to}`);
+        } else {
+          throw new Error("Conversion failed");
+        }
+      } catch (err) {
+        showResult(`Error: ${err.message}`);
+      }
+    }
+
+    function swapCurrencies() {
+      const from = document.getElementById('fromCurrency');
+      const to = document.getElementById('toCurrency');
+      [from.value, to.value] = [to.value, from.value];
+    }
+
+    function showCustomRateModal() {
+      document.getElementById('customRateModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('customRateModal').style.display = 'none';
+    }
+
+    function saveCustomRate() {
+      const from = document.getElementById('customFromCurrency').value;
+      const to = document.getElementById('customToCurrency').value;
+      const rate = parseFloat(document.getElementById('customRate').value);
+
+      if (!from || !to || isNaN(rate)) {
+        alert('Please enter valid data');
+        return;
+      }
+
+      const key = `${from}_${to}`;
+      customRates[key] = rate;
+      localStorage.setItem('customRates', JSON.stringify(customRates));
+      populateCustomRateList();
+      closeModal();
+    }
+
+    function populateCustomRateList() {
+      const list = document.getElementById('customRateList');
+      list.innerHTML = Object.entries(customRates).map(([key, rate]) => `
+        <div class="custom-rate-item">
+          <span>${key.replace('_', ' to ')}: ${rate}</span>
+          <button onclick="deleteCustomRate('${key}')">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteCustomRate(key) {
+      delete customRates[key];
+      localStorage.setItem('customRates', JSON.stringify(customRates));
+      populateCustomRateList();
+    }
+
+    function showResult(message) {
+      document.getElementById('result').textContent = message;
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
