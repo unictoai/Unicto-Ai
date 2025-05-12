@@ -4,20 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loan EMI Calculator - Unicto AI</title>
-  <meta name="description" content="Use the free Loan EMI Calculator from Unicto AI to estimate your monthly payments, interest, and total repayment with a helpful chart visualization.">
-
-  <!-- Open Graph / Facebook -->
-  <meta property="og:title" content="Loan EMI Calculator - Unicto AI">
-  <meta property="og:description" content="Accurately calculate your loan EMI, interest, and total payments with our free EMI calculator.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://www.unicto.com/tools/loan-emi-calculator">
-  <meta property="og:image" content="https://www.unicto.com/assets/emi-preview.png">
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Loan EMI Calculator - Unicto AI">
-  <meta name="twitter:description" content="Use the free Loan EMI Calculator from Unicto AI to estimate your monthly payments, interest, and total repayment with a helpful chart visualization.">
-  <meta name="twitter:image" content="https://www.unicto.com/assets/emi-preview.png">
+  <meta name="description" content="Use the free Loan EMI Calculator from Unicto AI to estimate your monthly payments, interest, and total repayment. Supports multiple currencies and live exchange rates.">
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
@@ -27,7 +14,7 @@
     "name": "Loan EMI Calculator",
     "url": "https://www.unicto.com/tools/loan-emi-calculator",
     "image": "https://www.unicto.com/assets/emi-preview.png",
-    "description": "Free online Loan EMI Calculator by Unicto AI to calculate monthly EMIs, total interest, and repayment schedule with a helpful chart.",
+    "description": "Free online Loan EMI Calculator by Unicto AI to calculate monthly EMIs, total interest, and repayment schedule. Supports global currencies and exchange rates.",
     "applicationCategory": "FinanceApplication",
     "operatingSystem": "All",
     "offers": {
@@ -44,172 +31,207 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f5f5f5;
+      background: #f5f5f5;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
+      padding: 20px;
     }
-
     .calculator {
       max-width: 600px;
-      background-color: white;
-      margin: 40px 20px;
+      width: 100%;
+      background: #fff;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-
-    h2 {
-      text-align: center;
-    }
-
-    .input-group {
-      margin: 15px 0;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    input {
+    h2 { text-align: center; }
+    .input-group { margin: 15px 0; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; }
+    input, select {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-
     button {
-      width: 100%;
+      background: #4CAF50;
+      color: #fff;
       padding: 12px;
-      background-color: #4CAF50;
-      color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
+      width: 100%;
       font-size: 16px;
       cursor: pointer;
       margin-top: 10px;
     }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
+    button:hover { background: #45a049; }
     .result {
-      margin-top: 20px;
+      background: #e9f7ef;
       padding: 15px;
-      background-color: #e9f7ef;
+      margin-top: 20px;
       border-radius: 5px;
       display: none;
     }
-
+    .toggle {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .toggle input {
+      margin-right: 8px;
+    }
     canvas {
       margin-top: 20px;
       max-width: 100%;
     }
-
-    @media (max-width: 600px) {
-      .calculator {
-        margin: 20px;
-      }
-    }
   </style>
 </head>
 <body>
-  <main class="calculator">
+  <div class="calculator">
     <h2>Loan EMI Calculator</h2>
 
     <div class="input-group">
-      <label for="loanAmount">Loan Amount ($)</label>
-      <input type="number" id="loanAmount" min="0" value="10000">
+      <label for="currency">Select Currency</label>
+      <select id="currency">
+        <option value="USD|$">USD - United States Dollar ($)</option>
+        <option value="INR|₹">INR - Indian Rupee (₹)</option>
+        <option value="EUR|€">EUR - Euro (€)</option>
+        <option value="GBP|£">GBP - British Pound (£)</option>
+        <option value="JPY|¥">JPY - Japanese Yen (¥)</option>
+        <option value="CAD|C$">CAD - Canadian Dollar (C$)</option>
+        <option value="AUD|A$">AUD - Australian Dollar (A$)</option>
+        <option value="BRL|R$">BRL - Brazilian Real (R$)</option>
+        <option value="RUB|₽">RUB - Russian Ruble (₽)</option>
+        <option value="KRW|₩">KRW - South Korean Won (₩)</option>
+      </select>
+    </div>
+
+    <div class="toggle">
+      <input type="checkbox" id="useLiveRates">
+      <label for="useLiveRates">Use Real-Time Exchange Rate</label>
+    </div>
+
+    <div class="input-group">
+      <label for="loanAmount">Loan Amount (in base currency)</label>
+      <input type="number" id="loanAmount" value="10000">
     </div>
 
     <div class="input-group">
       <label for="interestRate">Annual Interest Rate (%)</label>
-      <input type="number" id="interestRate" min="0" step="0.1" value="8.5">
+      <input type="number" id="interestRate" step="0.1" value="8.5">
     </div>
 
     <div class="input-group">
       <label for="loanTenure">Loan Tenure (Years)</label>
-      <input type="number" id="loanTenure" min="1" value="5">
+      <input type="number" id="loanTenure" value="5">
     </div>
 
     <button onclick="calculateEMI()">Calculate EMI</button>
 
-    <div class="result" id="result" aria-live="polite">
+    <div class="result" id="result">
       <p><strong>Monthly EMI:</strong> <span id="emiAmount"></span></p>
       <p><strong>Total Payment:</strong> <span id="totalPayment"></span></p>
       <p><strong>Total Interest:</strong> <span id="totalInterest"></span></p>
+      <button onclick="downloadPDF()">Download PDF Report</button>
       <canvas id="emiChart" width="400" height="300"></canvas>
     </div>
-  </main>
+  </div>
 
   <script>
     let chart;
+    let lastResult = {};
 
-    function calculateEMI() {
-      const loanAmount = parseFloat(document.getElementById('loanAmount').value);
-      const annualInterestRate = parseFloat(document.getElementById('interestRate').value);
-      const loanTenureYears = parseFloat(document.getElementById('loanTenure').value);
+    async function calculateEMI() {
+      const loan = parseFloat(document.getElementById("loanAmount").value);
+      const rate = parseFloat(document.getElementById("interestRate").value);
+      const years = parseFloat(document.getElementById("loanTenure").value);
+      const [currencyCode, currencySymbol] = document.getElementById("currency").value.split("|");
+      const useLiveRates = document.getElementById("useLiveRates").checked;
 
-      if (loanAmount <= 0 || annualInterestRate <= 0 || loanTenureYears <= 0 || isNaN(loanAmount) || isNaN(annualInterestRate) || isNaN(loanTenureYears)) {
-        alert("Please enter valid positive values for all fields.");
+      if (loan <= 0 || rate <= 0 || years <= 0) {
+        alert("Enter valid values.");
         return;
       }
 
-      const monthlyRate = (annualInterestRate / 12) / 100;
-      const months = loanTenureYears * 12;
+      let conversionRate = 1;
+      if (useLiveRates && currencyCode !== "USD") {
+        const res = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${currencyCode}`);
+        const data = await res.json();
+        conversionRate = data.rates[currencyCode] || 1;
+      }
 
-      const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months)) /
-                  (Math.pow(1 + monthlyRate, months) - 1);
+      const monthlyRate = rate / 12 / 100;
+      const months = years * 12;
+      const emi = (loan * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+      const total = emi * months;
+      const interest = total - loan;
 
-      const totalPayment = emi * months;
-      const totalInterest = totalPayment - loanAmount;
+      const emiDisplay = emi * conversionRate;
+      const totalDisplay = total * conversionRate;
+      const interestDisplay = interest * conversionRate;
 
-      document.getElementById('emiAmount').textContent = `$${emi.toFixed(2)}`;
-      document.getElementById('totalPayment').textContent = `$${totalPayment.toFixed(2)}`;
-      document.getElementById('totalInterest').textContent = `$${totalInterest.toFixed(2)}`;
-      document.getElementById('result').style.display = 'block';
+      document.getElementById("emiAmount").textContent = `${currencySymbol}${emiDisplay.toFixed(2)}`;
+      document.getElementById("totalPayment").textContent = `${currencySymbol}${totalDisplay.toFixed(2)}`;
+      document.getElementById("totalInterest").textContent = `${currencySymbol}${interestDisplay.toFixed(2)}`;
+      document.getElementById("result").style.display = "block";
 
-      drawChart(loanAmount, totalInterest);
+      drawChart(loan * conversionRate, interest * conversionRate);
+
+      lastResult = {
+        currencySymbol,
+        loan: loan * conversionRate,
+        emi: emiDisplay,
+        total: totalDisplay,
+        interest: interestDisplay,
+        rate,
+        years
+      };
     }
 
     function drawChart(principal, interest) {
-      const ctx = document.getElementById('emiChart').getContext('2d');
+      const ctx = document.getElementById("emiChart").getContext("2d");
       if (chart) chart.destroy();
       chart = new Chart(ctx, {
-        type: 'pie',
+        type: "pie",
         data: {
-          labels: ['Principal', 'Interest'],
+          labels: ["Principal", "Interest"],
           datasets: [{
             data: [principal, interest],
-            backgroundColor: ['#4CAF50', '#FF9800']
+            backgroundColor: ["#4CAF50", "#FF9800"]
           }]
         },
         options: {
           responsive: true,
           plugins: {
             legend: {
-              position: 'bottom'
+              position: "bottom"
             }
           }
         }
       });
     }
 
-    // Reset results when user changes input
-    ['loanAmount', 'interestRate', 'loanTenure'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => {
-        document.getElementById('result').style.display = 'none';
-      });
-    });
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const r = lastResult;
+
+      doc.setFontSize(16);
+      doc.text("Loan EMI Report", 20, 20);
+      doc.setFontSize(12);
+      doc.text(`Loan Amount: ${r.currencySymbol}${r.loan.toFixed(2)}`, 20, 40);
+      doc.text(`Annual Interest Rate: ${r.rate}%`, 20, 50);
+      doc.text(`Loan Tenure: ${r.years} years`, 20, 60);
+      doc.text(`Monthly EMI: ${r.currencySymbol}${r.emi.toFixed(2)}`, 20, 80);
+      doc.text(`Total Interest: ${r.currencySymbol}${r.interest.toFixed(2)}`, 20, 90);
+      doc.text(`Total Payment: ${r.currencySymbol}${r.total.toFixed(2)}`, 20, 100);
+
+      doc.save("EMI_Report.pdf");
+    }
   </script>
 </body>
 </html>
