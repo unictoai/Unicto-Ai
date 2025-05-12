@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan EMI Calculator - Unicto AI</title>
+  <meta name="description" content="Use the free Loan EMI Calculator from Unicto AI to estimate your monthly payments, interest, and total repayment with a helpful chart visualization.">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:title" content="Loan EMI Calculator - Unicto AI">
+  <meta property="og:description" content="Accurately calculate your loan EMI, interest, and total payments with our free EMI calculator.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.unicto.com/tools/loan-emi-calculator">
+  <meta property="og:image" content="https://www.unicto.com/assets/emi-preview.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Loan EMI Calculator - Unicto AI">
+  <meta name="twitter:description" content="Use the free Loan EMI Calculator from Unicto AI to estimate your monthly payments, interest, and total repayment with a helpful chart visualization.">
+  <meta name="twitter:image" content="https://www.unicto.com/assets/emi-preview.png">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Loan EMI Calculator",
+    "url": "https://www.unicto.com/tools/loan-emi-calculator",
+    "image": "https://www.unicto.com/assets/emi-preview.png",
+    "description": "Free online Loan EMI Calculator by Unicto AI to calculate monthly EMIs, total interest, and repayment schedule with a helpful chart.",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "USD"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Unicto AI",
+      "url": "https://www.unicto.com"
+    }
+  }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .calculator {
+      max-width: 600px;
+      background-color: white;
+      margin: 40px 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .input-group {
+      margin: 15px 0;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e9f7ef;
+      border-radius: 5px;
+      display: none;
+    }
+
+    canvas {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      .calculator {
+        margin: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator">
+    <h2>Loan EMI Calculator</h2>
+
+    <div class="input-group">
+      <label for="loanAmount">Loan Amount ($)</label>
+      <input type="number" id="loanAmount" min="0" value="10000">
+    </div>
+
+    <div class="input-group">
+      <label for="interestRate">Annual Interest Rate (%)</label>
+      <input type="number" id="interestRate" min="0" step="0.1" value="8.5">
+    </div>
+
+    <div class="input-group">
+      <label for="loanTenure">Loan Tenure (Years)</label>
+      <input type="number" id="loanTenure" min="1" value="5">
+    </div>
+
+    <button onclick="calculateEMI()">Calculate EMI</button>
+
+    <div class="result" id="result" aria-live="polite">
+      <p><strong>Monthly EMI:</strong> <span id="emiAmount"></span></p>
+      <p><strong>Total Payment:</strong> <span id="totalPayment"></span></p>
+      <p><strong>Total Interest:</strong> <span id="totalInterest"></span></p>
+      <canvas id="emiChart" width="400" height="300"></canvas>
+    </div>
+  </main>
+
+  <script>
+    let chart;
+
+    function calculateEMI() {
+      const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+      const annualInterestRate = parseFloat(document.getElementById('interestRate').value);
+      const loanTenureYears = parseFloat(document.getElementById('loanTenure').value);
+
+      if (loanAmount <= 0 || annualInterestRate <= 0 || loanTenureYears <= 0 || isNaN(loanAmount) || isNaN(annualInterestRate) || isNaN(loanTenureYears)) {
+        alert("Please enter valid positive values for all fields.");
+        return;
+      }
+
+      const monthlyRate = (annualInterestRate / 12) / 100;
+      const months = loanTenureYears * 12;
+
+      const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+                  (Math.pow(1 + monthlyRate, months) - 1);
+
+      const totalPayment = emi * months;
+      const totalInterest = totalPayment - loanAmount;
+
+      document.getElementById('emiAmount').textContent = `$${emi.toFixed(2)}`;
+      document.getElementById('totalPayment').textContent = `$${totalPayment.toFixed(2)}`;
+      document.getElementById('totalInterest').textContent = `$${totalInterest.toFixed(2)}`;
+      document.getElementById('result').style.display = 'block';
+
+      drawChart(loanAmount, totalInterest);
+    }
+
+    function drawChart(principal, interest) {
+      const ctx = document.getElementById('emiChart').getContext('2d');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Principal', 'Interest'],
+          datasets: [{
+            data: [principal, interest],
+            backgroundColor: ['#4CAF50', '#FF9800']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    // Reset results when user changes input
+    ['loanAmount', 'interestRate', 'loanTenure'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        document.getElementById('result').style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
