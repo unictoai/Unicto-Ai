@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meta Tag Analyzer - Unicto AI</title>
+  <meta name="description" content="Analyze your SEO meta tags and structure with Unicto AI's free Meta Tag Analyzer tool.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background: #121212;
+      color: #ddd;
+    }
+    h1 { color: #2c3e50; }
+    .dark-mode h1 { color: #ddd; }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      font-family: monospace;
+      margin-top: 10px;
+      background: #fff;
+      color: #000;
+    }
+    .dark-mode textarea {
+      background: #1e1e1e;
+      color: #fff;
+    }
+
+    button {
+      margin: 10px 5px 0 0;
+      padding: 10px 20px;
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .result {
+      background: #fff;
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      white-space: pre-wrap;
+    }
+    .dark-mode .result {
+      background: #1e1e1e;
+      color: #eee;
+    }
+
+    .score {
+      font-size: 18px;
+      font-weight: bold;
+      color: #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <h1>Meta Tag Analyzer</h1>
+  <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  <p>Paste your full HTML code below to analyze SEO elements.</p>
+  <textarea id="htmlInput" placeholder="Paste your HTML code here..."></textarea>
+  <br>
+  <button onclick="analyze()">Analyze</button>
+  <button onclick="copyResults()">Copy Results</button>
+  <button onclick="exportResults()">Export as TXT</button>
+
+  <div id="output" class="result" style="display:none;"></div>
+
+  <script>
+    const textarea = document.getElementById('htmlInput');
+    textarea.addEventListener('paste', () => setTimeout(analyze, 100));
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function analyze() {
+      const html = textarea.value;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      const getMeta = name => doc.querySelector(`meta[name="${name}"]`)?.content || 'Not found';
+      const getProp = prop => doc.querySelector(`meta[property="${prop}"]`)?.content || 'Not found';
+
+      const title = doc.querySelector('title')?.textContent || 'Not found';
+      const description = getMeta('description');
+      const keywords = getMeta('keywords');
+      const robots = getMeta('robots');
+      const ogTitle = getProp('og:title');
+      const ogDesc = getProp('og:description');
+      const twitterTitle = getMeta('twitter:title');
+      const canonical = doc.querySelector('link[rel="canonical"]')?.href || 'Not found';
+      const h1s = Array.from(doc.querySelectorAll('h1')).map(h => h.textContent.trim()).filter(Boolean);
+
+      let score = 0;
+      if (title !== 'Not found') score += 15;
+      if (description !== 'Not found') score += 15;
+      if (keywords !== 'Not found') score += 10;
+      if (robots !== 'Not found') score += 10;
+      if (ogTitle !== 'Not found') score += 10;
+      if (ogDesc !== 'Not found') score += 10;
+      if (twitterTitle !== 'Not found') score += 10;
+      if (canonical !== 'Not found') score += 10;
+      if (h1s.length > 0) score += 10;
+
+      const resultText = `
+Title: ${title}
+Description: ${description}
+Keywords: ${keywords}
+Robots: ${robots}
+Open Graph Title: ${ogTitle}
+Open Graph Description: ${ogDesc}
+Twitter Title: ${twitterTitle}
+Canonical URL: ${canonical}
+H1 Tags: ${h1s.join(', ') || 'None'}
+SEO Score: ${score}/100
+      `.trim();
+
+      document.getElementById('output').textContent = resultText;
+      document.getElementById('output').style.display = 'block';
+    }
+
+    function copyResults() {
+      const text = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(text).then(() => alert("Results copied!"));
+    }
+
+    function exportResults() {
+      const text = document.getElementById('output').textContent;
+      const blob = new Blob([text], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "meta-tag-analysis.txt";
+      a.click();
+    }
+  </script>
+</body>
+</html>
