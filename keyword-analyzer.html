@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keyword Analyzer Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      min-width: 600px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Keyword Analyzer</h1>
+    <input type="text" id="keyword" placeholder="Enter a keyword..." />
+    <button onclick="analyzeKeyword()">Analyze</button>
+    <table id="resultsTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th>Search Volume</th>
+          <th>Competition</th>
+          <th>CPC</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+  <script>
+    async function analyzeKeyword() {
+      const keyword = document.getElementById('keyword').value.trim();
+      if (!keyword) return alert('Please enter a keyword');
+
+      const fakeData = [
+        { keyword: keyword, volume: 2900, competition: 'Low', cpc: '$0.25' },
+        { keyword: keyword + ' tool', volume: 1200, competition: 'Medium', cpc: '$0.65' },
+        { keyword: keyword + ' software', volume: 950, competition: 'High', cpc: '$1.10' }
+      ];
+
+      const resultsTable = document.getElementById('resultsTable');
+      const resultsBody = document.getElementById('resultsBody');
+      resultsBody.innerHTML = '';
+      fakeData.forEach(data => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${data.keyword}</td>
+          <td>${data.volume}</td>
+          <td>${data.competition}</td>
+          <td>${data.cpc}</td>
+        `;
+        resultsBody.appendChild(row);
+      });
+      resultsTable.style.display = 'table';
+    }
+  </script>
+</body>
+</html>
