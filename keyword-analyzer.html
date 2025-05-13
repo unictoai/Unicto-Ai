@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Keyword Analyzer Tool</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,19 +13,18 @@
       padding: 20px;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      overflow-x: auto;
     }
     h1 {
       text-align: center;
       color: #333;
     }
-    input, button {
+    input, select, button {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
@@ -35,7 +35,8 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
-      min-width: 600px;
+      table-layout: fixed;
+      word-wrap: break-word;
     }
     table, th, td {
       border: 1px solid #ddd;
@@ -47,50 +48,148 @@
     th {
       background-color: #f2f2f2;
     }
+    .chart-container {
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Keyword Analyzer</h1>
-    <input type="text" id="keyword" placeholder="Enter a keyword..." />
+    
+    <input type="text" id="keyword" placeholder="Enter a keyword..." oninput="filterKeywords()">
+    <select id="competitionFilter" onchange="filterKeywords()">
+      <option value="">All Competitions</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+    </select>
     <button onclick="analyzeKeyword()">Analyze</button>
-    <table id="resultsTable" style="display:none;">
+    <button onclick="exportCSV()" style="background:#28a745;color:white">Export to CSV</button>
+
+    <table id="resultsTable" style="display:none">
       <thead>
         <tr>
           <th>Keyword</th>
-          <th>Search Volume</th>
+          <th>Estimated Volume</th>
           <th>Competition</th>
           <th>CPC</th>
+          <th>SEO Score</th>
         </tr>
       </thead>
       <tbody id="resultsBody"></tbody>
     </table>
+
+    <div class="chart-container">
+      <canvas id="volumeChart"></canvas>
+    </div>
   </div>
+
   <script>
-    async function analyzeKeyword() {
+    let fakeData = [];
+    let keywordHistory = JSON.parse(localStorage.getItem('keywordHistory') || '[]');
+
+    function analyzeKeyword() {
       const keyword = document.getElementById('keyword').value.trim();
       if (!keyword) return alert('Please enter a keyword');
 
-      const fakeData = [
-        { keyword: keyword, volume: 2900, competition: 'Low', cpc: '$0.25' },
-        { keyword: keyword + ' tool', volume: 1200, competition: 'Medium', cpc: '$0.65' },
-        { keyword: keyword + ' software', volume: 950, competition: 'High', cpc: '$1.10' }
+      // Generate mock data
+      fakeData = [
+        { keyword: keyword, volume: 3561, competition: 'Medium', cpc: 1.73 },
+        { keyword: `best ${keyword}`, volume: 4577, competition: 'Low', cpc: 0.98 },
+        { keyword: `${keyword} 2025`, volume: 2741, competition: 'Medium', cpc: 1.20 },
+        { keyword: `top ${keyword}`, volume: 2280, competition: 'Low', cpc: 1.14 },
+        { keyword: `${keyword} online`, volume: 528, competition: 'Low', cpc: 1.69 },
+        { keyword: `${keyword} tool`, volume: 3660, competition: 'Medium', cpc: 1.74 },
+        { keyword: `${keyword} free`, volume: 2150, competition: 'High', cpc: 2.32 },
+        { keyword: `${keyword} download`, volume: 1000, competition: 'High', cpc: 2.12 }
       ];
 
-      const resultsTable = document.getElementById('resultsTable');
-      const resultsBody = document.getElementById('resultsBody');
-      resultsBody.innerHTML = '';
-      fakeData.forEach(data => {
+      // Update history
+      if (!keywordHistory.includes(keyword)) {
+        keywordHistory.push(keyword);
+        localStorage.setItem('keywordHistory', JSON.stringify(keywordHistory));
+      }
+
+      renderTable(fakeData);
+      renderChart(fakeData);
+    }
+
+    function getSEOScore(volume, cpc, competition) {
+      let score = 0;
+      score += Math.min(volume / 5000, 1) * 40;
+      score += Math.min(cpc / 3, 1) * 30;
+      score += competition === 'Low' ? 30 : competition === 'Medium' ? 15 : 0;
+      return Math.round(score);
+    }
+
+    function renderTable(data) {
+      const table = document.getElementById('resultsTable');
+      const body = document.getElementById('resultsBody');
+      body.innerHTML = '';
+      
+      data.forEach(item => {
+        const score = getSEOScore(item.volume, item.cpc, item.competition);
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${data.keyword}</td>
-          <td>${data.volume}</td>
-          <td>${data.competition}</td>
-          <td>${data.cpc}</td>
+          <td>${item.keyword}</td>
+          <td>${item.volume}</td>
+          <td>${item.competition}</td>
+          <td>$${item.cpc.toFixed(2)}</td>
+          <td>${score}/100</td>
         `;
-        resultsBody.appendChild(row);
+        body.appendChild(row);
       });
-      resultsTable.style.display = 'table';
+      
+      table.style.display = data.length ? 'table' : 'none';
+    }
+
+    function exportCSV() {
+      if (!fakeData.length) return alert('No data to export');
+      let csv = 'Keyword,Estimated Volume,Competition,CPC,SEO Score\n';
+      fakeData.forEach(row => {
+        const score = getSEOScore(row.volume, row.cpc, row.competition);
+        csv += `${row.keyword},${row.volume},${row.competition},$${row.cpc.toFixed(2)},${score}/100\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'keyword_analysis.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function renderChart(data) {
+      const ctx = document.getElementById('volumeChart').getContext('2d');
+      if (window.volumeChart?.destroy) window.volumeChart.destroy();
+
+      window.volumeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(d => d.keyword),
+          datasets: [{
+            label: 'Search Volume',
+            data: data.map(d => d.volume),
+            backgroundColor: '#4e73df'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function filterKeywords() {
+      const text = document.getElementById('keyword').value.toLowerCase();
+      const comp = document.getElementById('competitionFilter').value;
+      const filtered = fakeData.filter(k =>
+        k.keyword.toLowerCase().includes(text) &&
+        (!comp || k.competition === comp)
+      );
+      renderTable(filtered);
+      renderChart(filtered);
     }
   </script>
 </body>
