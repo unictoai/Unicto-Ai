@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Create beautiful personalized letters with our Text to Letter Tool. Customize fonts, themes, add images and download your letter as an image." />
+<meta name="keywords" content="text to letter, letter maker, letter creator, personalized letter, letter generator" />
+<meta name="author" content="Unicto AI" />
+<title>Text to Letter Tool 💌 - Create Beautiful Letters</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Georgia&family=Courier+Prime&display=swap" rel="stylesheet" />
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fff8f6;
+    color: #3c2f2f;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: linear-gradient(90deg, #f8a1a1, #fce4ec);
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    box-shadow: 0 4px 10px rgba(248,161,161,.5);
+    user-select: none;
+  }
+  main {
+    flex-grow: 1;
+    max-width: 900px;
+    margin: 2rem auto 3rem;
+    padding: 0 1rem;
+    width: 100%;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  select, input[type="file"], input[type="color"] {
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    border: 2px solid #f8a1a1;
+    background: #fff0f2;
+    color: #3c2f2f;
+    cursor: pointer;
+    min-width: 160px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  select:focus, input[type="file"]:focus, input[type="color"]:focus {
+    outline: none;
+    border-color: #f76c6c;
+    box-shadow: 0 0 8px #f76c6caa;
+  }
+  textarea {
+    width: 100%;
+    min-height: 180px;
+    font-size: 1.2rem;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 2px solid #f8a1a1;
+    background: #fff0f2;
+    color: #3c2f2f;
+    font-family: 'Georgia', serif;
+    resize: vertical;
+    box-shadow: inset 0 0 6px #f8a1a1aa;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: #f76c6c;
+    box-shadow: inset 0 0 10px #f76c6ccc;
+  }
+  .letter-preview {
+    background: linear-gradient(135deg, #fff0f2, #fde8e8);
+    border-radius: 18px;
+    padding: 3rem 2rem;
+    min-height: 300px;
+    box-shadow: 0 8px 25px rgba(248,161,161,0.3);
+    text-align: center;
+    position: relative;
+    color: #5a3e36;
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.5rem;
+    line-height: 1.6;
+    user-select: text;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+  }
+  .letter-preview img {
+    max-width: 180px;
+    margin-top: 1.2rem;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    display: none;
+  }
+  .buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1.2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  button {
+    background: #f76c6c;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    padding: 0.7rem 1.8rem;
+    cursor: pointer;
+    box-shadow:
+      0 0 5px #f76c6caa,
+      0 0 15px #f76c6c88,
+      0 0 30px #f76c6c44;
+    transition: background-color 0.3s ease, box-shadow 0.4s ease;
+    user-select: none;
+  }
+  button:hover, button:focus {
+    background: #ee4b4b;
+    box-shadow:
+      0 0 8px #ee4b4baa,
+      0 0 22px #ee4b4b99,
+      0 0 38px #ee4b4b77;
+    outline: none;
+  }
+  @media (max-width: 480px) {
+    .controls {
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.9rem 1rem;
+    }
+  }
+</style>
+</head>
+<body>
+<header>Text to Letter Tool 💌</header>
+<main>
+  <section class="controls" aria-label="Letter customization controls">
+    <select id="themeSelect" aria-label="Select letter theme" title="Choose letter theme">
+      <option value="floral">Floral Theme</option>
+      <option value="romantic">Romantic Theme</option>
+      <option value="classic">Classic Theme</option>
+    </select>
+
+    <select id="fontSelect" aria-label="Select font style" title="Choose font style">
+      <option value="'Dancing Script', cursive">Flower Writing</option>
+      <option value="Georgia, serif">Classic Serif</option>
+      <option value="'Courier Prime', monospace">Typewriter</option>
+    </select>
+
+    <input type="color" id="colorPicker" aria-label="Select text color" title="Choose text color" value="#5a3e36" />
+
+    <select id="aiPrompt" aria-label="Select AI letter prompt" title="Select AI letter prompt">
+      <option value="">-- AI Letter Prompt --</option>
+      <option value="romantic">Write a romantic letter</option>
+      <option value="apology">Apology letter to friend</option>
+      <option value="congratulations">Congratulations for achievement</option>
+    </select>
+
+    <input type="file" id="imageUpload" accept="image/*" aria-label="Upload image to include in letter" title="Upload an image" />
+  </section>
+
+  <textarea
+    id="letterInput"
+    aria-label="Letter input area"
+    placeholder="Write your letter here..."
+  ></textarea>
+
+  <article class="letter-preview" id="letterPreview" aria-live="polite" role="region" aria-label="Letter preview">
+    <div id="letterText">Your letter preview will appear here...</div>
+    <img id="uploadedImage" alt="Uploaded decoration" />
+    <audio id="bgMusic" loop>
+      <source src="https://cdn.pixabay.com/download/audio/2023/03/28/audio_10977247e3.mp3?filename=love-theme-141777.mp3" type="audio/mpeg" />
+      Sorry, your browser does not support the audio element.
+    </audio>
+  </article>
+
+  <section class="buttons">
+    <button id="previewBtn" type="button" aria-label="Preview your letter">Preview Letter</button>
+    <button id="downloadBtn" type="button" aria-label="Download your letter as an image">Download as Image</button>
+    <button id="printBtn" type="button" aria-label="Print your letter">Print Letter</button>
+    <button id="toggleMusicBtn" type="button" aria-pressed="false" aria-label="Play or pause background music">Play Music</button>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  const elements = {
+    letterInput: document.getElementById('letterInput'),
+    letterText: document.getElementById('letterText'),
+    themeSelect: document.getElementById('themeSelect'),
+    fontSelect: document.getElementById('fontSelect'),
+    colorPicker: document.getElementById('colorPicker'),
+    aiPrompt: document.getElementById('aiPrompt'),
+    imageUpload: document.getElementById('imageUpload'),
+    uploadedImage: document.getElementById('uploadedImage'),
+    letterPreview: document.getElementById('letterPreview'),
+    bgMusic: document.getElementById('bgMusic'),
+    downloadBtn: document.getElementById('downloadBtn'),
+    printBtn: document.getElementById('printBtn'),
+    toggleMusicBtn: document.getElementById('toggleMusicBtn')
+  };
+
+  const aiPrompts = {
+    romantic: "My dearest love,\n\nEvery moment with you is magical...\n\nForever yours,\n[Your Name]",
+    apology: "Dear friend,\n\nI sincerely apologize for...\n\nBest regards,\n[Your Name]",
+    congratulations: "Dear [Name],\n\nCongratulations on your achievement!\n\nWarm wishes,\n[Your Name]"
+  };
+
+  function updatePreview() {
+    elements.letterText.innerHTML = elements.letterInput.value.trim() 
+      ? elements.letterInput.value.replace(/\n/g, '<br>')
+      : 'Your letter preview will appear here...';
+
+    elements.letterText.style.fontFamily = elements.fontSelect.value.replace(/'/g, '');
+    elements.letterText.style.color = elements.colorPicker.value;
+
+    switch(elements.themeSelect.value) {
+      case 'floral':
+        elements.letterPreview.style.background = 'linear-gradient(135deg, #fff0f2, #fde8e8)';
+        break;
+      case 'romantic':
+        elements.letterPreview.style.background = 'linear-gradient(135deg, #ffe6f0, #f7c1d1)';
+        break;
+      case 'classic':
+        elements.letterPreview.style.background = '#f5f1e9';
+        break;
+      default:
+        elements.letterPreview.style.background = '#fff8f6';
+    }
+
+    elements.uploadedImage.style.display = elements.uploadedImage.src ? 'block' : 'none';
+  }
+
+  // Event Handlers
+  elements.aiPrompt.addEventListener('change', () => {
+    const prompt = elements.aiPrompt.value;
+    if (aiPrompts[prompt]) {
+      elements.letterInput.value = aiPrompts[prompt];
+      updatePreview();
+    }
+  });
+
+  elements.imageUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        elements.uploadedImage.src = evt.target.result;
+        updatePreview();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      elements.uploadedImage.src = '';
+      updatePreview();
+    }
+  });
+
+  elements.downloadBtn.addEventListener('click', async () => {
+    try {
+      const originalText = elements.downloadBtn.textContent;
+      elements.downloadBtn.disabled = true;
+      elements.downloadBtn.textContent = 'Creating Image...';
+      elements.downloadBtn.style.opacity = '0.7';
+
+      // Wait for fonts and images to load
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const options = {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        logging: true,
+        allowTaint: false,
+        onclone: (clonedDoc) => {
+          const preview = clonedDoc.getElementById('letterPreview');
+          preview.style.fontFamily = elements.fontSelect.value;
+        }
+      };
+
+      const canvas = await html2canvas(elements.letterPreview, options);
+      const link = document.createElement('a');
+      link.download = `letter_${Date.now()}.png`;
+      
+      canvas.toBlob(blob => {
+        if (!blob) throw new Error('Failed to create image blob');
+        
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+          link.remove();
+        }, 1000);
+      }, 'image/png');
+
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(`Download failed: ${error.message}`);
+    } finally {
+      elements.downloadBtn.disabled = false;
+      elements.downloadBtn.textContent = 'Download as Image';
+      elements.downloadBtn.style.opacity = '1';
+    }
+  });
+
+  elements.printBtn.addEventListener('click', () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Printed Letter</title>
+          <style>
+            body { 
+              padding: 2rem;
+              font-family: ${elements.fontSelect.value};
+              color: ${elements.colorPicker.value};
+              background: ${elements.letterPreview.style.background};
+              white-space: pre-wrap;
+            }
+          </style>
+        </head>
+        <body>${elements.letterInput.value.replace(/\n/g, '<br>')}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  });
+
+  elements.toggleMusicBtn.addEventListener('click', () => {
+    if (elements.bgMusic.paused) {
+      elements.bgMusic.play()
+        .catch(() => alert('Please interact with the page first to play music'));
+      elements.toggleMusicBtn.textContent = 'Pause Music';
+    } else {
+      elements.bgMusic.pause();
+      elements.toggleMusicBtn.textContent = 'Play Music';
+    }
+  });
+
+  // Live Updates
+  elements.letterInput.addEventListener('input', updatePreview);
+  elements.fontSelect.addEventListener('change', updatePreview);
+  elements.themeSelect.addEventListener('change', updatePreview);
+  elements.colorPicker.addEventListener('input', updatePreview);
+
+  // Initial Setup
+  updatePreview();
+</script>
+</body>
+</html>
