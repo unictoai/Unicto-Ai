@@ -4,8 +4,8 @@
   ‎<link rel="icon" href="favicon-16x16.png" type="image/x-icon">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scientific Calculator | Unicto AI</title>
-  <meta name="description" content="Advanced scientific calculator by Unicto AI for solving equations, trigonometry, logarithms, and more." />
+  <title>Enhanced Scientific Calculator | Unicto AI</title>
+  <meta name="description" content="Advanced scientific calculator by Unicto AI with DEG/RAD mode, memory functions, and more." />
   <meta name="keywords" content="Scientific Calculator, Math Calculator, Trigonometry, Unicto AI, Online Calculator, Pi, Logarithm, Root, Factorial" />
   <meta name="author" content="Unicto AI" />
   <link rel="icon" href="https://unicto.com/favicon.ico" />
@@ -13,19 +13,39 @@
     :root {
       --primary-color: #00e6e6;
       --background-dark: #121212;
+      --background-light: #f5f5f5;
       --button-bg: #2a2a2a;
+      --button-bg-light: #e0e0e0;
+      --text-dark: #121212;
+      --text-light: #ffffff;
+      --display-bg: #2a2a2a;
+      --display-bg-light: #e0e0e0;
+      --display-color: #00e6e6;
+      --display-color-light: #008080;
+      --history-bg: #1a1a1a;
+      --history-bg-light: #e8e8e8;
+      --history-color: #00e6e6;
+      --history-color-light: #006666;
+      --operator-bg: #004466;
+      --operator-bg-light: #b3e0ff;
+      --special-bg: #660033;
+      --special-bg-light: #ffb3d9;
+      --equals-bg: #006600;
+      --equals-bg-light: #99ff99;
+      --mode-active: #00cc00;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      transition: background-color 0.3s, color 0.3s;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: var(--background-dark);
-      color: #fff;
+      color: var(--text-light);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -33,19 +53,91 @@
       padding: 20px;
     }
 
+    body.light-mode {
+      background: var(--background-light);
+      color: var(--text-dark);
+    }
+
     header {
       text-align: center;
       margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
     }
 
     header img {
       width: 50px;
-      margin-bottom: 8px;
+      height: 50px;
     }
 
     header h1 {
       font-size: 1.6rem;
       color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .light-mode header h1 {
+      color: var(--history-color-light);
+    }
+
+    .theme-toggle {
+      background: var(--button-bg);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      margin-top: 10px;
+      transition: transform 0.2s;
+    }
+
+    .light-mode .theme-toggle {
+      background: var(--button-bg-light);
+      color: var(--history-color-light);
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .mode-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .mode-btn {
+      background: var(--button-bg);
+      border: none;
+      border-radius: 20px;
+      color: #fff;
+      padding: 8px 15px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .light-mode .mode-btn {
+      background: var(--button-bg-light);
+      color: var(--text-dark);
+    }
+
+    .mode-btn.active {
+      background: var(--mode-active);
+      color: white;
     }
 
     .calculator {
@@ -57,17 +149,28 @@
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     }
 
+    .light-mode .calculator {
+      background: #ffffff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
     #display {
-      background: var(--button-bg);
+      background: var(--display-bg);
       border: none;
       border-radius: 8px;
-      color: var(--primary-color);
+      color: var(--display-color);
       font-size: 2em;
       margin-bottom: 20px;
       padding: 20px;
       text-align: right;
       width: 100%;
       outline: none;
+      font-weight: 500;
+    }
+
+    .light-mode #display {
+      background: var(--display-bg-light);
+      color: var(--display-color-light);
     }
 
     .buttons {
@@ -82,71 +185,175 @@
       border-radius: 6px;
       color: #fff;
       cursor: pointer;
-      font-size: 1.2em;
-      padding: 15px;
+      font-size: 1.1em;
+      padding: 15px 5px;
       transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .light-mode button {
+      background: var(--button-bg-light);
+      color: var(--text-dark);
     }
 
     button:hover {
       background: #3a3a3a;
+      transform: translateY(-2px);
+    }
+
+    .light-mode button:hover {
+      background: #d0d0d0;
     }
 
     .operator {
-      background: #004466;
+      background: var(--operator-bg);
       color: var(--primary-color);
     }
 
+    .light-mode .operator {
+      background: var(--operator-bg-light);
+      color: var(--history-color-light);
+    }
+
     .special {
-      background: #660033;
+      background: var(--special-bg);
+    }
+
+    .light-mode .special {
+      background: var(--special-bg-light);
     }
 
     .equals {
-      background: #006600;
+      background: var(--equals-bg);
       grid-column: span 2;
+      font-weight: bold;
+    }
+
+    .light-mode .equals {
+      background: var(--equals-bg-light);
+      color: #006600;
+    }
+
+    .memory {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .memory-btn {
+      flex: 1;
+      padding: 10px;
+      font-size: 0.9rem;
+      background: #005566;
+    }
+
+    .light-mode .memory-btn {
+      background: #80dfff;
+      color: #004d66;
     }
 
     .history {
       margin-top: 20px;
       width: 100%;
       max-width: 420px;
-      background: #1a1a1a;
+      background: var(--history-bg);
       border-radius: 10px;
-      padding: 10px;
+      padding: 15px;
       font-size: 0.9em;
       max-height: 150px;
       overflow-y: auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .light-mode .history {
+      background: var(--history-bg-light);
+      color: var(--text-dark);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
     .history h3 {
-      color: var(--primary-color);
-      margin-bottom: 5px;
+      color: var(--history-color);
+      font-weight: 600;
+    }
+
+    .light-mode .history h3 {
+      color: var(--history-color-light);
+    }
+
+    .clear-history {
+      background: var(--special-bg);
+      border: none;
+      border-radius: 4px;
+      color: white;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .light-mode .clear-history {
+      background: var(--special-bg-light);
+      color: #660033;
+    }
+
+    #history-list div {
+      padding: 4px 0;
+      border-bottom: 1px dashed #444;
+    }
+
+    .light-mode #history-list div {
+      border-bottom: 1px dashed #ccc;
     }
 
     @media (max-width: 480px) {
       #display {
         font-size: 1.5em;
+        padding: 15px;
       }
       button {
         font-size: 1em;
-        padding: 12px;
+        padding: 12px 5px;
+      }
+      header h1 {
+        font-size: 1.4rem;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="https://unicto.com/logo.png" alt="Unicto AI" />
-    <h1>Unicto AI Scientific Calculator</h1>
+    <div class="header-content">
+      <img src="https://unicto.com/logo.png" alt="Unicto AI" />
+      <h1>Enhanced Scientific Calculator</h1>
+    </div>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
   </header>
+
+  <div class="mode-controls">
+    <button class="mode-btn" id="degRadBtn">RAD</button>
+    <button class="mode-btn" id="shiftBtn">2nd</button>
+  </div>
+
+  <div class="memory">
+    <button class="memory-btn" onclick="memoryClear()">MC</button>
+    <button class="memory-btn" onclick="memoryRecall()">MR</button>
+    <button class="memory-btn" onclick="memoryAdd()">M+</button>
+    <button class="memory-btn" onclick="memorySubtract()">M-</button>
+  </div>
 
   <div class="calculator">
     <input type="text" id="display" readonly />
     <div class="buttons">
-      <button class="operator" onclick="addToDisplay('sin(')">sin</button>
-      <button class="operator" onclick="addToDisplay('cos(')">cos</button>
-      <button class="operator" onclick="addToDisplay('tan(')">tan</button>
-      <button class="operator" onclick="addToDisplay('log(')">log</button>
-      <button class="operator" onclick="addToDisplay('ln(')">ln</button>
+      <button class="operator" id="btnSin" onclick="trigFunc('sin')">sin</button>
+      <button class="operator" id="btnCos" onclick="trigFunc('cos')">cos</button>
+      <button class="operator" id="btnTan" onclick="trigFunc('tan')">tan</button>
+      <button class="operator" id="btnLog" onclick="logFunc()">log</button>
+      <button class="operator" id="btnLn" onclick="lnFunc()">ln</button>
 
       <button class="operator" onclick="addToDisplay('(')">(</button>
       <button class="operator" onclick="addToDisplay(')')">)</button>
@@ -180,14 +387,31 @@
     </div>
   </div>
 
-  <div class="history" id="history">
-    <h3>History</h3>
+  <div class="history">
+    <div class="history-header">
+      <h3>History</h3>
+      <button class="clear-history" onclick="clearHistory()">Clear</button>
+    </div>
     <div id="history-list"></div>
   </div>
 
   <script>
     const display = document.getElementById("display");
     const historyList = document.getElementById("history-list");
+    const degRadBtn = document.getElementById("degRadBtn");
+    const shiftBtn = document.getElementById("shiftBtn");
+    const themeToggle = document.getElementById("themeToggle");
+    const btnSin = document.getElementById("btnSin");
+    const btnCos = document.getElementById("btnCos");
+    const btnTan = document.getElementById("btnTan");
+    const btnLog = document.getElementById("btnLog");
+    const btnLn = document.getElementById("btnLn");
+
+    let shiftMode = false;
+    let degMode = false;
+    let memory = 0;
+    let history = [];
+    const MAX_HISTORY = 20;
 
     function addToDisplay(val) {
       display.value += val;
@@ -208,29 +432,185 @@
       return result;
     }
 
+    function trigFunc(func) {
+      if (shiftMode) {
+        // Inverse trigonometric functions
+        addToDisplay('a' + func + '(');
+      } else if (degMode) {
+        // Hyperbolic functions
+        addToDisplay(func + 'h(');
+      } else {
+        // Standard trigonometric functions
+        addToDisplay(func + '(');
+      }
+    }
+
+    function logFunc() {
+      if (shiftMode) {
+        addToDisplay('log2(');
+      } else {
+        addToDisplay('log(');
+      }
+    }
+
+    function lnFunc() {
+      if (shiftMode) {
+        addToDisplay('e^(');
+      } else {
+        addToDisplay('ln(');
+      }
+    }
+
+    function toggleShiftMode() {
+      shiftMode = !shiftMode;
+      shiftBtn.textContent = shiftMode ? '2nd' : '1st';
+      shiftBtn.classList.toggle('active', shiftMode);
+      
+      // Update button labels
+      if (shiftMode) {
+        btnSin.textContent = 'asin';
+        btnCos.textContent = 'acos';
+        btnTan.textContent = 'atan';
+        btnLog.textContent = 'log₂';
+        btnLn.textContent = 'eˣ';
+      } else {
+        if (degMode) {
+          btnSin.textContent = 'sinh';
+          btnCos.textContent = 'cosh';
+          btnTan.textContent = 'tanh';
+        } else {
+          btnSin.textContent = 'sin';
+          btnCos.textContent = 'cos';
+          btnTan.textContent = 'tan';
+        }
+        btnLog.textContent = 'log';
+        btnLn.textContent = 'ln';
+      }
+    }
+
+    function toggleDegRad() {
+      degMode = !degMode;
+      degRadBtn.textContent = degMode ? 'DEG' : 'RAD';
+      degRadBtn.classList.toggle('active', degMode);
+      
+      // Update button labels
+      if (!shiftMode) {
+        if (degMode) {
+          btnSin.textContent = 'sinh';
+          btnCos.textContent = 'cosh';
+          btnTan.textContent = 'tanh';
+        } else {
+          btnSin.textContent = 'sin';
+          btnCos.textContent = 'cos';
+          btnTan.textContent = 'tan';
+        }
+      }
+    }
+
     function calculate() {
       try {
         let exp = display.value
           .replace(/π/g, "Math.PI")
           .replace(/e/g, "Math.E")
           .replace(/√\(/g, "Math.sqrt(")
-          .replace(/sin\(/g, "Math.sin(")
-          .replace(/cos\(/g, "Math.cos(")
-          .replace(/tan\(/g, "Math.tan(")
+          .replace(/sinh\(/g, "Math.sinh(")
+          .replace(/cosh\(/g, "Math.cosh(")
+          .replace(/tanh\(/g, "Math.tanh(")
+          .replace(/asin\(/g, "Math.asin(")
+          .replace(/acos\(/g, "Math.acos(")
+          .replace(/atan\(/g, "Math.atan(")
           .replace(/log\(/g, "Math.log10(")
+          .replace(/log2\(/g, "Math.log2(")
           .replace(/ln\(/g, "Math.log(")
           .replace(/\^/g, "**")
           .replace(/(\d+)!/g, (_, n) => `factorial(${n})`);
 
+        // Convert degrees to radians if in DEG mode
+        if (degMode && !shiftMode) {
+          exp = exp
+            .replace(/sin\(/g, "Math.sin(Math.PI/180*")
+            .replace(/cos\(/g, "Math.cos(Math.PI/180*")
+            .replace(/tan\(/g, "Math.tan(Math.PI/180*");
+        } else {
+          exp = exp
+            .replace(/sin\(/g, "Math.sin(")
+            .replace(/cos\(/g, "Math.cos(")
+            .replace(/tan\(/g, "Math.tan(");
+        }
+
         const result = eval(exp);
-        const rounded = Number.isFinite(result) ? +result.toFixed(8) : "Error";
-        historyList.innerHTML += `<div>${display.value} = ${rounded}</div>`;
+        const rounded = Number.isFinite(result) ? 
+          (Math.abs(result) > 1e-10 ? +result.toFixed(10) : 0) : 
+          "Error";
+          
+        // Add to history
+        history.push({ expression: display.value, result: rounded });
+        if (history.length > MAX_HISTORY) {
+          history.shift();
+        }
+        updateHistory();
+        
         display.value = rounded;
       } catch {
         display.value = "Error";
         setTimeout(clearDisplay, 1000);
       }
     }
+
+    function memoryClear() {
+      memory = 0;
+    }
+
+    function memoryRecall() {
+      addToDisplay(memory);
+    }
+
+    function memoryAdd() {
+      try {
+        const currentValue = parseFloat(eval(display.value));
+        if (!isNaN(currentValue)) {
+          memory += currentValue;
+        }
+      } catch (e) {
+        // Ignore error
+      }
+    }
+
+    function memorySubtract() {
+      try {
+        const currentValue = parseFloat(eval(display.value));
+        if (!isNaN(currentValue)) {
+          memory -= currentValue;
+        }
+      } catch (e) {
+        // Ignore error
+      }
+    }
+
+    function updateHistory() {
+      historyList.innerHTML = '';
+      for (let i = history.length - 1; i >= 0; i--) {
+        const entry = history[i];
+        const div = document.createElement('div');
+        div.textContent = `${entry.expression} = ${entry.result}`;
+        historyList.appendChild(div);
+      }
+    }
+
+    function clearHistory() {
+      history = [];
+      updateHistory();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      themeToggle.textContent = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+    }
+
+    // Event listeners
+    degRadBtn.addEventListener('click', toggleDegRad);
+    shiftBtn.addEventListener('click', toggleShiftMode);
+    themeToggle.addEventListener('click', toggleTheme);
 
     document.addEventListener("keydown", (e) => {
       if (/\d|\+|\-|\*|\/|\(|\)|\./.test(e.key)) {
@@ -243,7 +623,9 @@
         clearDisplay();
       }
     });
+
+    // Initialize
+    updateHistory();
   </script>
 </body>
-        </html>
-        
+</html>
