@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Text to Letter Tool 💌 - Create Beautiful Letters</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Georgia&family=Courier+Prime&family=Pacifico&family=Playfair+Display&family=Satisfy&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #fff8f6, #fce4ec);
+      color: #3c2f2f;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+    
+    header {
+      background: linear-gradient(90deg, #f8a1a1, #fce4ec);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      box-shadow: 0 4px 10px rgba(248,161,161,.5);
+      user-select: none;
+      position: relative;
+    }
+    
+    .header-icons {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .header-icons i {
+      font-size: 1.5rem;
+      color: #5a3e36;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .header-icons i:hover {
+      transform: scale(1.2);
+    }
+    
+    main {
+      flex-grow: 1;
+      max-width: 900px;
+      margin: 2rem auto 3rem;
+      padding: 0 1rem;
+      width: 100%;
+    }
+    
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      background: #fff0f2;
+      padding: 1rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(248,161,161,0.2);
+    }
+    
+    .control-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      color: #5a3e36;
+      font-weight: 500;
+    }
+    
+    select, input[type="file"], input[type="color"], input[type="range"], input[type="text"], input[type="date"] {
+      font-size: 1rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      border: 2px solid #f8a1a1;
+      background: #fff;
+      color: #3c2f2f;
+      cursor: pointer;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      width: 100%;
+    }
+    
+    input[type="text"] {
+      cursor: text;
+    }
+    
+    input[type="range"] {
+      padding: 0;
+      cursor: default;
+    }
+    
+    select:focus, input[type="file"]:focus, input[type="color"]:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: #f76c6c;
+      box-shadow: 0 0 8px #f76c6caa;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      font-size: 1.2rem;
+      padding: 1rem;
+      border-radius: 12px;
+      border: 2px solid #f8a1a1;
+      background: #fff0f2;
+      color: #3c2f2f;
+      font-family: 'Georgia', serif;
+      resize: vertical;
+      box-shadow: inset 0 0 6px #f8a1a1aa;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      margin-bottom: 1.5rem;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #f76c6c;
+      box-shadow: inset 0 0 10px #f76c6ccc;
+    }
+    
+    .letter-preview {
+      background: linear-gradient(135deg, #fff0f2, #fde8e8);
+      border-radius: 18px;
+      padding: 3rem 2rem;
+      min-height: 300px;
+      box-shadow: 0 8px 25px rgba(248,161,161,0.3);
+      text-align: center;
+      position: relative;
+      color: #5a3e36;
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.5rem;
+      line-height: 1.6;
+      user-select: text;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    
+    .letter-preview img {
+      max-width: 180px;
+      margin: 1.2rem auto;
+      border-radius: 14px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+      display: block;
+    }
+    
+    .signature {
+      margin-top: 2rem;
+      font-family: 'Satisfy', cursive;
+      font-size: 1.8rem;
+      text-align: right;
+      color: #5a3e36;
+    }
+    
+    .date-display {
+      text-align: right;
+      font-family: 'Georgia', serif;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      color: #7a5d5d;
+    }
+    
+    .buttons {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      background: #f76c6c;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.1rem;
+      padding: 0.7rem 1.8rem;
+      cursor: pointer;
+      box-shadow: 0 0 5px #f76c6caa, 0 0 15px #f76c6c88, 0 0 30px #f76c6c44;
+      transition: all 0.3s ease;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    button:hover, button:focus {
+      background: #ee4b4b;
+      box-shadow: 0 0 8px #ee4b4baa, 0 0 22px #ee4b4b99, 0 0 38px #ee4b4b77;
+      transform: translateY(-2px);
+      outline: none;
+    }
+    
+    button i {
+      font-size: 1.2rem;
+    }
+    
+    .feature-tag {
+      background: linear-gradient(90deg, #f8a1a1, #f76c6c);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-custom {
+      display: block;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      border: 2px solid #f8a1a1;
+      background: #fff;
+      color: #3c2f2f;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .file-custom:hover {
+      background: #fff0f2;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      header {
+        font-size: 1.7rem;
+        padding: 1.2rem 1rem;
+      }
+      
+      .header-icons {
+        top: 12px;
+        right: 12px;
+        gap: 10px;
+      }
+      
+      .header-icons i {
+        font-size: 1.3rem;
+      }
+      
+      .controls-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      button {
+        width: 100%;
+        padding: 0.9rem 1rem;
+      }
+      
+      .letter-preview {
+        padding: 2rem 1.5rem;
+        font-size: 1.3rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      header {
+        font-size: 1.5rem;
+        padding: 1rem 0.5rem;
+      }
+      
+      .header-icons {
+        top: 10px;
+        right: 10px;
+        gap: 8px;
+      }
+      
+      .letter-preview {
+        padding: 1.5rem 1rem;
+        font-size: 1.2rem;
+      }
+      
+      .buttons {
+        gap: 0.8rem;
+      }
+    }
+    
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f76c6c;
+      border-radius: 50%;
+      animation: confetti-fall 3s ease-in-out forwards;
+      z-index: 1000;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  Enhanced Text to Letter Tool 💌
+  <div class="header-icons">
+    <i class="fas fa-sun" id="themeToggle" title="Toggle dark mode"></i>
+    <i class="fas fa-question-circle" id="helpBtn" title="Help"></i>
+    <i class="fas fa-share-alt" id="shareBtn" title="Share"></i>
+  </div>
+</header>
+<main>
+  <div class="controls-grid">
+    <div class="control-group">
+      <label for="themeSelect"><i class="fas fa-palette"></i> Theme</label>
+      <select id="themeSelect" aria-label="Select letter theme">
+        <option value="floral">Floral Theme</option>
+        <option value="romantic">Romantic Theme</option>
+        <option value="classic">Classic Theme</option>
+        <option value="vintage">Vintage Theme</option>
+        <option value="modern">Modern Theme</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label for="fontSelect"><i class="fas fa-font"></i> Font</label>
+      <select id="fontSelect" aria-label="Select font style">
+        <option value="'Dancing Script', cursive">Flower Writing</option>
+        <option value="Georgia, serif">Classic Serif</option>
+        <option value="'Courier Prime', monospace">Typewriter</option>
+        <option value="'Pacifico', cursive">Fancy Script</option>
+        <option value="'Playfair Display', serif">Elegant Serif</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label for="colorPicker"><i class="fas fa-fill-drip"></i> Text Color</label>
+      <input type="color" id="colorPicker" aria-label="Select text color" value="#5a3e36" />
+    </div>
+    
+    <div class="control-group">
+      <label for="fontSize"><i class="fas fa-text-height"></i> Font Size</label>
+      <input type="range" id="fontSize" min="14" max="32" value="24" />
+      <span id="fontSizeValue">24px</span>
+    </div>
+    
+    <div class="control-group">
+      <label for="aiPrompt"><i class="fas fa-magic"></i> AI Prompt</label>
+      <select id="aiPrompt" aria-label="Select AI letter prompt">
+        <option value="">-- AI Letter Prompt --</option>
+        <option value="romantic">Write a romantic letter</option>
+        <option value="apology">Apology letter to friend</option>
+        <option value="congratulations">Congratulations for achievement</option>
+        <option value="birthday">Birthday wish</option>
+        <option value="thankyou">Thank you letter</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label for="imageUpload"><i class="fas fa-image"></i> Add Image</label>
+      <div class="file-input-wrapper">
+        <input type="file" id="imageUpload" accept="image/*" aria-label="Upload image to include in letter" />
+        <div class="file-custom" id="fileLabel">Choose an image...</div>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label for="signature"><i class="fas fa-signature"></i> Signature</label>
+      <input type="text" id="signature" placeholder="Your name" />
+    </div>
+    
+    <div class="control-group">
+      <label for="datePicker"><i class="fas fa-calendar"></i> Date</label>
+      <input type="date" id="datePicker" />
+    </div>
+  </div>
+
+  <textarea
+    id="letterInput"
+    aria-label="Letter input area"
+    placeholder="Write your letter here..."
+  ></textarea>
+
+  <article class="letter-preview" id="letterPreview" aria-live="polite" role="region" aria-label="Letter preview">
+    <span class="feature-tag">NEW</span>
+    <div id="letterText">Your letter preview will appear here...</div>
+    <div class="signature" id="signatureDisplay"></div>
+    <div class="date-display" id="dateDisplay"></div>
+    <audio id="bgMusic" loop>
+      <source src="https://cdn.pixabay.com/download/audio/2023/03/28/audio_10977247e3.mp3?filename=love-theme-141777.mp3" type="audio/mpeg" />
+      Sorry, your browser does not support the audio element.
+    </audio>
+  </article>
+
+  <section class="buttons">
+    <button id="previewBtn" type="button" aria-label="Preview your letter">
+      <i class="fas fa-eye"></i> Preview Letter
+    </button>
+    <button id="downloadBtn" type="button" aria-label="Download your letter as an image">
+      <i class="fas fa-download"></i> Download Image
+    </button>
+    <button id="printBtn" type="button" aria-label="Print your letter">
+      <i class="fas fa-print"></i> Print Letter
+    </button>
+    <button id="toggleMusicBtn" type="button" aria-pressed="false" aria-label="Play or pause background music">
+      <i class="fas fa-music"></i> Play Music
+    </button>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  const elements = {
+    letterInput: document.getElementById('letterInput'),
+    letterText: document.getElementById('letterText'),
+    themeSelect: document.getElementById('themeSelect'),
+    fontSelect: document.getElementById('fontSelect'),
+    colorPicker: document.getElementById('colorPicker'),
+    fontSize: document.getElementById('fontSize'),
+    fontSizeValue: document.getElementById('fontSizeValue'),
+    aiPrompt: document.getElementById('aiPrompt'),
+    imageUpload: document.getElementById('imageUpload'),
+    fileLabel: document.getElementById('fileLabel'),
+    letterPreview: document.getElementById('letterPreview'),
+    bgMusic: document.getElementById('bgMusic'),
+    downloadBtn: document.getElementById('downloadBtn'),
+    printBtn: document.getElementById('printBtn'),
+    toggleMusicBtn: document.getElementById('toggleMusicBtn'),
+    signatureInput: document.getElementById('signature'),
+    signatureDisplay: document.getElementById('signatureDisplay'),
+    datePicker: document.getElementById('datePicker'),
+    dateDisplay: document.getElementById('dateDisplay'),
+    themeToggle: document.getElementById('themeToggle'),
+    helpBtn: document.getElementById('helpBtn'),
+    shareBtn: document.getElementById('shareBtn')
+  };
+
+  const aiPrompts = {
+    romantic: "My dearest love,\n\nEvery moment with you is magical. The way your eyes sparkle when you smile, the sound of your laughter, and the warmth of your embrace - these are the treasures that fill my heart with joy. I cherish every second we spend together and dream of a lifetime by your side.\n\nForever yours,\n[Your Name]",
+    apology: "Dear friend,\n\nI am writing to sincerely apologize for my recent actions. I realize now that my behavior was inappropriate and hurtful, and I deeply regret causing you any pain. Please know that I value our friendship immensely and I am committed to making things right between us.\n\nBest regards,\n[Your Name]",
+    congratulations: "Dear [Name],\n\nCongratulations on your incredible achievement! Your hard work, dedication, and perseverance have truly paid off. This accomplishment is well-deserved, and I couldn't be happier for you. Wishing you continued success in all your future endeavors!\n\nWarm wishes,\n[Your Name]",
+    birthday: "Dear [Name],\n\nHappy Birthday! On this special day, I wish you all the happiness, health, and success in the world. May your day be filled with joy, laughter, and wonderful surprises. You deserve the very best today and always!\n\nWith love,\n[Your Name]",
+    thankyou: "Dear [Name],\n\nThank you so much for your kindness and generosity. Your thoughtful gesture truly touched my heart and made a significant difference. I am deeply grateful for your support and feel fortunate to have you in my life.\n\nWith sincere appreciation,\n[Your Name]"
+  };
+
+  // Initialize date picker with today's date
+  const today = new Date();
+  elements.datePicker.valueAsDate = today;
+  updateDateDisplay();
+
+  // Set initial font size display
+  elements.fontSizeValue.textContent = `${elements.fontSize.value}px`;
+
+  function updatePreview() {
+    elements.letterText.innerHTML = elements.letterInput.value.trim() 
+      ? elements.letterInput.value.replace(/\n/g, '<br>')
+      : 'Your letter preview will appear here...';
+
+    elements.letterText.style.fontFamily = elements.fontSelect.value.replace(/'/g, '');
+    elements.letterText.style.color = elements.colorPicker.value;
+    elements.letterText.style.fontSize = elements.fontSize.value + 'px';
+
+    // Update signature
+    elements.signatureDisplay.textContent = elements.signatureInput.value || '';
+    
+    // Update theme
+    switch(elements.themeSelect.value) {
+      case 'floral':
+        elements.letterPreview.style.background = 'linear-gradient(135deg, #fff0f2, #fde8e8)';
+        break;
+      case 'romantic':
+        elements.letterPreview.style.background = 'linear-gradient(135deg, #ffe6f0, #f7c1d1)';
+        break;
+      case 'classic':
+        elements.letterPreview.style.background = '#f5f1e9';
+        break;
+      case 'vintage':
+        elements.letterPreview.style.background = 'linear-gradient(135deg, #f5e8d1, #e7d5b7)';
+        break;
+      case 'modern':
+        elements.letterPreview.style.background = '#f0f7ff';
+        break;
+      default:
+        elements.letterPreview.style.background = '#fff8f6';
+    }
+  }
+
+  function updateDateDisplay() {
+    const date = new Date(elements.datePicker.value);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    elements.dateDisplay.textContent = date.toLocaleDateString('en-US', options);
+  }
+
+  function createConfetti() {
+    const colors = ['#f76c6c', '#f8a1a1', '#ffd166', '#06d6a0', '#118ab2'];
+    for (let i = 0; i < 50; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.width = Math.random() * 10 + 5 + 'px';
+      confetti.style.height = confetti.style.width;
+      confetti.style.animationDelay = Math.random() * 2 + 's';
+      document.body.appendChild(confetti);
+      
+      setTimeout(() => {
+        confetti.remove();
+      }, 3000);
+    }
+  }
+
+  // Event Handlers
+  elements.aiPrompt.addEventListener('change', () => {
+    const prompt = elements.aiPrompt.value;
+    if (aiPrompts[prompt]) {
+      elements.letterInput.value = aiPrompts[prompt].replace(/\[Your Name\]/g, elements.signatureInput.value || 'Your Name');
+      updatePreview();
+    }
+  });
+
+  elements.imageUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      elements.fileLabel.textContent = file.name;
+      elements.fileLabel.style.fontWeight = 'bold';
+      elements.fileLabel.style.color = '#f76c6c';
+      
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          // Create new image
+          const img = document.createElement('img');
+          img.src = evt.target.result;
+          img.alt = "Uploaded decoration";
+          img.style.maxWidth = '180px';
+          img.style.margin = '1.2rem auto';
+          img.style.borderRadius = '14px';
+          img.style.boxShadow = '0 3px 12px rgba(0,0,0,0.1)';
+          img.style.display = 'block';
+          
+          // Clear any existing images
+          elements.letterPreview.querySelectorAll('img').forEach(img => img.remove());
+          
+          // Add to letter preview
+          elements.letterPreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      elements.fileLabel.textContent = 'Choose an image...';
+      elements.fileLabel.style.fontWeight = 'normal';
+      elements.fileLabel.style.color = '#3c2f2f';
+      elements.letterPreview.querySelectorAll('img').forEach(img => img.remove());
+    }
+  });
+
+  elements.downloadBtn.addEventListener('click', async () => {
+    try {
+      const originalContent = elements.downloadBtn.innerHTML;
+      elements.downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+      elements.downloadBtn.disabled = true;
+
+      // Wait for fonts and images to load
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const options = {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        allowTaint: false
+      };
+
+      const canvas = await html2canvas(elements.letterPreview, options);
+      const link = document.createElement('a');
+      link.download = `beautiful_letter_${Date.now()}.png`;
+      
+      canvas.toBlob(blob => {
+        if (!blob) throw new Error('Failed to create image blob');
+        
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+          link.remove();
+        }, 1000);
+      }, 'image/png');
+
+      createConfetti();
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(`Download failed: ${error.message}`);
+    } finally {
+      elements.downloadBtn.disabled = false;
+      elements.downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Image';
+    }
+  });
+
+  elements.printBtn.addEventListener('click', () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Printed Letter</title>
+          <style>
+            body { 
+              padding: 2rem;
+              font-family: ${elements.fontSelect.value};
+              color: ${elements.colorPicker.value};
+              background: ${elements.letterPreview.style.background};
+              white-space: pre-wrap;
+              font-size: ${elements.fontSize.value}px;
+            }
+            .signature {
+              margin-top: 2rem;
+              font-family: 'Satisfy', cursive;
+              font-size: 1.8rem;
+              text-align: right;
+            }
+            .date-display {
+              text-align: right;
+              font-family: 'Georgia', serif;
+              font-size: 1rem;
+              margin-top: 0.5rem;
+            }
+          </style>
+        </head>
+        <body>
+          ${elements.letterInput.value.replace(/\n/g, '<br>')}
+          <div class="signature">${elements.signatureInput.value || ''}</div>
+          <div class="date-display">${elements.dateDisplay.textContent}</div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+    
+    createConfetti();
+  });
+
+  elements.toggleMusicBtn.addEventListener('click', () => {
+    if (elements.bgMusic.paused) {
+      elements.bgMusic.play()
+        .catch(() => alert('Please interact with the page first to play music'));
+      elements.toggleMusicBtn.innerHTML = '<i class="fas fa-pause"></i> Pause Music';
+    } else {
+      elements.bgMusic.pause();
+      elements.toggleMusicBtn.innerHTML = '<i class="fas fa-music"></i> Play Music';
+    }
+  });
+
+  elements.signatureInput.addEventListener('input', () => {
+    elements.signatureDisplay.textContent = elements.signatureInput.value;
+  });
+
+  elements.datePicker.addEventListener('change', updateDateDisplay);
+
+  elements.fontSize.addEventListener('input', () => {
+    elements.fontSizeValue.textContent = `${elements.fontSize.value}px`;
+    updatePreview();
+  });
+
+  elements.themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    elements.themeToggle.classList.toggle('fa-sun');
+    elements.themeToggle.classList.toggle('fa-moon');
+    
+    if (document.body.classList.contains('dark-mode')) {
+      document.body.style.background = 'linear-gradient(135deg, #2c2c54, #474787)';
+      document.body.style.color = '#f7f1e3';
+    } else {
+      document.body.style.background = 'linear-gradient(135deg, #fff8f6, #fce4ec)';
+      document.body.style.color = '#3c2f2f';
+    }
+  });
+
+  elements.helpBtn.addEventListener('click', () => {
+    alert('Welcome to the Enhanced Text to Letter Tool!\n\n1. Type your letter or use AI prompts\n2. Customize theme, font, and colors\n3. Add your signature and date\n4. Download or print your beautiful letter');
+  });
+
+  elements.shareBtn.addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Text to Letter Tool',
+        text: 'Create beautiful personalized letters with this amazing tool!',
+        url: window.location.href
+      })
+      .catch(console.error);
+    } else {
+      alert('Web Share API not supported in your browser. Copy the URL to share.');
+    }
+  });
+
+  // Live Updates
+  elements.letterInput.addEventListener('input', updatePreview);
+  elements.fontSelect.addEventListener('change', updatePreview);
+  elements.themeSelect.addEventListener('change', updatePreview);
+  elements.colorPicker.addEventListener('input', updatePreview);
+
+  // Initial Setup
+  updatePreview();
+</script>
+</body>
+</html>
